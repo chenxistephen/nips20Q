@@ -1,0 +1,50 @@
+This is BibTeX, Version 0.99d (TeX Live 2013)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: nips2015.aux
+The style file: ieee.bst
+Database file #1: nips2015.bib
+Warning--empty booktitle in arbelaez2014multiscale
+Warning--empty journal in mottaghirole
+Warning--empty year in mottaghirole
+You've used 24 entries,
+            2120 wiz_defined-function locations,
+            633 strings with 8064 characters,
+and the built_in function-call counts, 9408 in all, are:
+= -- 928
+> -- 496
+< -- 7
++ -- 195
+- -- 170
+* -- 681
+:= -- 1534
+add.period$ -- 77
+call.type$ -- 24
+change.case$ -- 156
+chr.to.int$ -- 0
+cite$ -- 27
+duplicate$ -- 351
+empty$ -- 696
+format.name$ -- 170
+if$ -- 1977
+int.to.chr$ -- 0
+int.to.str$ -- 24
+missing$ -- 25
+newline$ -- 122
+num.names$ -- 48
+pop$ -- 178
+preamble$ -- 1
+purify$ -- 133
+quote$ -- 0
+skip$ -- 244
+stack$ -- 0
+substring$ -- 577
+swap$ -- 89
+text.length$ -- 7
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 94
+warning$ -- 3
+while$ -- 87
+width$ -- 26
+write$ -- 261
+(There were 3 warnings)

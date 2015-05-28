@@ -1,0 +1,450 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage{cvpr}
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{array}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% added by muzi
+
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{subfigure}
+\usepackage{multirow}
+\usepackage{rotating}
+
+\newcommand{\rk}[1]{{\color{blue}{#1}}}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Include other packages here, before hyperref.
+
+% If you comment hyperref and then uncomment it, you should delete
+% egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
+% run, let it finish, and you should be clear).
+\usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
+
+% \cvprfinalcopy % *** Uncomment this line for the final submission
+
+\def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
+\def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
+
+% Pages are numbered in submission mode, and unnumbered in camera-ready
+\ifcvprfinal\pagestyle{empty}\fi
+\begin{document}
+
+%%%%%%%%% TITLE
+\title{Submodular Ranking for Object Proposal Generation}
+
+\author{First Author\\
+Institution1\\
+Institution1 address\\
+{\tt\small firstauthor@i1.org}
+% For a paper whose authors are all at the same institution,
+% omit the following lines up until the closing ``}''.
+% Additional authors and addresses can be added with ``\and'',
+% just like the second author.
+% To save space, use either the email address or home page, not both
+\and
+Second Author\\
+Institution2\\
+First line of institution2 address\\
+{\tt\small secondauthor@i2.org}
+}
+
+\maketitle
+%\thispagestyle{empty}
+
+%%%%%%%%% ABSTRACT
+\begin{abstract}
+	A multi-scale object proposal generation approach is presented. Our approach is built on top of hierarchical segmentation based on the multi-scale nature of objects and images. We first refine our segment regions within each scale based on diversity ranking to maintain diversity and centrality. Object proposals are then selected via solving a submodular objective function. It maximizes the representative ability of the selected proposal set to the whole image and encourages object proposals to be selected from different scales. The experimental results on the Berkeley Segmentation Dataset and Pascal VOC2012 segmentation dataset demonstrate the accuracy and efficiency of our model. We further test our object proposals for simultaneous segmentation and detection task and achieve state-of-art performance.
+\end{abstract}
+
+
+
+%%%%%%%%% BODY TEXT
+\section{Introduction}
+Object recognition has long been a core problem of computer vision and scene understanding. Recent approaches mainly lie in the realms of sliding window based object detection and localization~\cite{Viola04, Dalal05, Felzenszwalb10} and segmentation-based image parsing. The former paradigm suffers great computational cost as it goes through sliding windows at every location and every scale of the image. While the second paradigm gives better spatial support with richer shape and contextual information, the quality of segmentation has long been a bottleneck of the followed recognition pipeline.
+
+To improve both the spatial support and localization of segmentation for object recognition, generating high-quality category-independent object proposal as the input for object recognition system has gain great interest in recent years~\cite{Endres14, Uijlings13, Cheng14, Arbelaez14}. Based on the research from cognitive psychology and neurobiology~\cite{Teuber55, Wolfe04, Desimone95, Koch85}, human vision system has the amazing ability to localize objects before recognizing them. A limited number of high-quality and category-independent object proposals are generated as the input for further computer vision tasks. This approach has played a dominant role in semantic segmentation~\cite{Arbelaez12, Carreira12ECCV} and have competitive performance on detection~\cite{Fidler13}. Based on the output proposal shape, proposal-based paradigm further divided into window-shape proposals~\cite{Zitnick14, Cheng14, Uijlings13} and segment proposals~\cite{Arbelaez14, Endres14, Singh14}. The latter one provides more accurate shape and location details of the possible objects.
+
+Objects in images are intrinsically hierarchical and of different scale. Therefore, it is unrealistic to delineate objects uniquely and simultaneously. Multi-scale segmentation is essential to localize and segment different objects. There are a few work~\cite{Uijlings13, Arbelaez14} try to combine multiple scale information in object proposal process, but very few people has studied the importance of segmentation selection phase in the process. 
+
+In this paper, we present a submodular objective function to efficiently select high-quality object proposals from a refined hierarchical segment pool. We first obtain a hierarchical segmentation pool and refine segments within each layer; then rank and select high-quality object proposals from the refined pool. Our objective function consists of two terms: a similarity term (between the object proposal set and the whole segment pool) and a reward term (measures objectiveness confidence of the selected object proposals). The first term encourages the selected object proposals to well represent an image and cover as many major components of the images as possible. The second term compares object candidates among different scales and encourages the selected object proposals to have high possibility to be an object. It takes object scaling information into account and automatically avoids selecting segments from same layer repeatedly. Our main contributions are as follows:
+
+\begin{itemize}
+\item The generation of object proposals is solved by maximizing a submodular objective function. This introduces a new perspective to produce object proposals, and it achieves state-of-art performance.
+\item We naturally integrate multi-scale information into one objective function, and it can be solved efficiently based on its submodularity property. 
+\item We present an efficient greedy algorithm by using submodularity property of the objective function. Our method is computationally efficient while having a high object proposal quality.
+\item Our approach achieves state-of-the-art performance on two popular datasets, and our object proposals have successful applications on segmentation and detection tasks.
+\end{itemize}
+
+%We have evaluated our method on the BSDS dataset and PASCAL VOC2012 segmentation dataset. The experimental results show that our method achieves state-of-art object-level accuracy while computationally more efficient. We further test our object proposals with simultaneous detection and segmentation task~\cite{Hariharan14} and achieve higher AP score than object proposals generated from other existing methods. 
+
+%-------------------------------------------------------------------------
+\section{Related work}
+{\bf Category Independent Object Proposal} The goal of object proposal is to generate a small amount of high-quality category-independent object proposals such that each object in an image can be well captured by at least one proposal~\cite{Alexe12, Endres14}. Compared to the sliding window paradigm which requires a sophisticated classifier for each class, it dramatically decreases the candidate amounts, reducing both computational and model-learning cost. There are a group of methods producing window-size based object proposals. \cite{Zitnick14} generated bounding boxes by utilizing edge and contour clues. In~\cite{Uijlings13}, a data-driven grouping strategy is presented to combine segmentation and exhaustive search. \cite{Cheng14} proposed binarized normed gradients (BING) feature to efficiently produce object boxes. In our work, we focus on the pixel-level object extraction which can provide more accurate shape and location information for possible object candidates. Some work has been done to create segmented object proposals. \cite{Carreira12} segmented object proposals by solving a series of constrained parametric min-cut (CPMC) problems. \cite{Humayun14} reused inference in graph cuts to solve the parametric min-cut problems much more efficiently. \cite{Endres14} performed graph cuts cuts and ranked regions using structured learning. In~\cite{Arbelaez14}, multi-scale combinatorial grouping is proposed and a hierarchical segmenter is used to combine multi-scale information. A grouping algorithm is performed using the combinatorial space of multi-scale region. In contrast, we group regions within each scale and leverage multi-scale information using an efficient submodular ranking method in the object proposal selection process. 
+
+{\bf Object Segmentation and Detection} Semantic segmentation and object detection have been shown to help each other mutually in a wide variety of work in the past years.~\cite{malisiewicz-bmvc07} is one of the first to show that better quality of segmentation spatial support can improve object recognition performance.~\cite{Fidler13, Chen11, Hariharan14} use multiple segmentation and combines several top-down cues to  semantic segmentation and object detection. Object proposals have been used to improve these systems in many works, such as segmentation~\cite{Arbelaez12, Carreira12}, object detection~\cite{Fidler13} and large-scale classification~\cite{Uijlings13}. A more demanding task of simultaneous detection and segmentation (SDS) is proposed in~\cite{Hariharan14} which detect and label the segments at the same time. We use this challenging task to test our object proposals. 
+
+{\bf Convolutional Neural Network} Convolutional Neural Network (CNN) was popularly used for object recognition in applications like digit recognition~\cite{lecun1989backpropagation} using backpropagation. The substantial improvement of state-of-the-art results on ImageNet Large Scale Visual Recognition Challenge (ILSVRC)~\cite{deng2012imagenet} using deep CNN structure in~\cite{krizhevsky2012imagenet} draws great attentions to the field in both academia and industry. In recent years, using CNN features extracted and fine-tuned on regions generated by object proposal algorithms has been a popular pipeline and has achieved good results on object recognition benchmarks. ~\cite{girshick14CVPR} proposed the R-CNN framework to generalize the~\cite{krizhevsky2012imagenet} model to object detection in PASCAL VOC Challenge by classifying region proposals generated by~\cite{Sande11} to achieve state-of-the-art object detection results. ~\cite{Hariharan14} recently extends the R-CNN framework to simultaneous object segmentation and detection. It learns and extracts features using object proposals from~\cite{Arbelaez14} and shows promising results on the SDS tasks on PASCAL VOC2012 dataset.
+
+{\bf Submodular Optimization} Submodular optimization is a useful optimization tool in a variety of machine learning and computer vision problems~\cite{Liu13, Kim12CVPR, Jiang13, Liu14, Zhu14}. In~\cite{Kim12CVPR}, a diffusion-based framework is proposed to solve cosegmentation problems via submodular optimization. \cite{Jiang13} use facility location problem to model salient region detection where salient regions are obtained by maximizing the submodular objective function. 
+
+%-------------------------------------------------------------------------
+\section{Preliminaries}
+\textbf{Submodularity:} Let $V$ be a finite set, $A\subseteq B \subseteq V$ and $a \in V\setminus B$. A set function $F: 2^v \rightarrow R$ is submodular if $F(A\bigcup a)-F(A)\geqslant F(B\bigcup a)-F(B)$. This is the diminishing return property: adding an element to a smaller set helps more than adding it to a larger set~\cite{Nemhauser78}.
+
+\textbf{Theorem 1.} Given functions $F: 2^V\rightarrow R$ and $f:R\rightarrow R$, the composition $F'=f\circ F: 2^V \rightarrow R$ is non-decreasing submodular, if f is non-decreasing concave and F is non-decreasing submodular. 
+
+%\textbf{Diversity ranking}
+%Diversity ranking~\cite{Kim12CVPR, Zhu07} is aiming at achieving a balance between centrality and diversity. In segmentation, centrality reduces redundancy while diversity maintains different segments. Suppose we have a graph $G=(V,E)$, then the optimization problem is formulated as follows based on the diffusion formulation.
+%\begin{eqnarray}
+%\label{dr}
+%max &&\sum_{x\in V}u(x)\\
+%s.t. &&u(x)=\frac{1}{a_x}\sum_{(x,y)\in E}d_{yx}u(y), a_x=\sum_{(x,y)\in E}d_{yx}+z_x \nonumber\\
+%&&u(g)=0, u(s)=1 \quad for \quad s\in S \subset V, |S|\leq K \nonumber
+%\end{eqnarray}
+%where the system is the graph $G$. $d_{xy}$ is the Gaussian similarity between features of vertices $x,y \in V$. $z_x$ is the dissipation conductance at vertex $x$. $a_x$ is the degree of $x$. $s$ denotes the source and $u(g)$ denotes the temperature outside the system. The objective $u(x;S)$ is submodular and can be solved by a greedy algorithm~\cite{Kim12CVPR}. Figure~\ref{} gives an example of diversity ranking. 
+%\textbf{Harmonic Function on a Graph:} Suppose we have $n (n=l+u)$ data points comprised of %labelled data points $(x_1,y_1), (x_2,y_2), ..., (x_m,y_m)$ with $M$ class labels $y\in {1,2,...,M}$ and unlabelled data points $x_{l+1},..,x_{l+u}$. We can construct a graph $G=(V,E)$ with nodes $V$ represent the $n$ data points. 
+
+
+%\rk{To be decide: Describe diversity ranking and clustering Or harmonic functions on a Graph. This will help to select set $J$.}
+
+%-------------------------------------------------------------------------
+\section{Submodular Proposal Generation}
+We first generate a large pool of segments from different scales. In coarser scales, we use the segments as object candidates directly; and for finer scales with large amount of segments, we perform diversity ranking and clustering to combine segments into object candidates automatically. We then solve a submodular objective function to rank and select object proposals from object candidates from different layers.  
+
+\subsection{Hierarchical Segmentation}
+We build our object proposal framework on top of a hierarchical segmentation method. Here we follow~\cite{Carreira12, Humayun14}, generating segments from different scale by solving multiple constrained parametric min-cut problems with different seeds and unary terms. One can also generate hierarchical segmentations based on the output boundary algorithm from~\cite{Hoiem11,Endres14}.
+
+\subsection{Potential Candidate Extraction}
+In the coarser layer/scale, an image is segmented into a few segments. However, the number of segments will increase dramatically as we go to finer layer. To reduce the redundancy and control computational cost, we introduce a potential candidate extraction step to pre-process segments within finer layers. If the number of segments of a layer $l$ is greater than a threshold $N_t$, we will employ diversity ranking and agglomerative clustering~\cite{Kim12CVPR} on segments to obtain potential object candidates within that layer, otherwise we will take segments of the image directly as object candidates for the next step. 
+
+%\rk{Using harmonic function/ diversity ranking to reduce the number of candidate patches.}
+
+\subsection{Submodular Multi-scale Proposal Generation}
+Usually, objects are of different scales in an image. It is difficult to segment them out simultaneous using one scale. On the other hand, it will be costly if keeping object candidates (patches) of all different layers from a hierarchical segmentation method. Therefore, we would like to select a set of high-quality candidates as object proposals. 
+
+Let us denote $V$ as the set containing object candidates from all layers of an image and $V^l$ as the set containing patches from one layer of the image. Then $V = \bigcup_{l\in \{1,2,...,L\}} V^l$, where $L$ is the total number of layers. As $V$ contains a large amount of object candidates, our goal is to select a small set of patches where each patch serves as a high-quality and category-independent object proposal. 
+
+\subsubsection{Representative Proposal Selection}
+We want to select a set $A$ which is representative to the whole set $V$ so that it can include major elements in $V$ and maintain the diversity. This can be modelled as a facility location problem~\cite{Galvao04, Mirchandani90}, which maximizes the similarity of set $A$ to the whole set $V$ with the penalty constraint on the size of set $A$. The problem is formulated as follow. 
+
+Given an image $I$, we construct a graph $G(V,E)$ based on the patch hypotheses in image $I$. Each vertex $v\in V$ is an element in the multi-scale object candidate pool obtained from the previous step. Each edge $e \in E$ models the pairwise relation between vertices. The weight $w_{ij}$ associated with the edge $e_{ij}$ measures the similarity between vertices $i$ and $j$. We extract CNN feature descriptor for each object candidate: $X=[x_1,x_2,...,x_N]$, where $N$ is the number of object candidates. $w_{ij}$ is defined as Gaussian similarity between two vertices' feature descriptors. 
+\begin{equation}
+  w_{ij}=\begin{cases}
+    exp(\epsilon d^2(x_i,x_j)), & \text{if $e_{ij}\in E$}.\\
+    0, & \text{otherwise}.
+  \end{cases}
+\end{equation}
+As suggested in~\cite{Zelnik04}, we set normalization factor $\epsilon=1/\sigma_i \sigma_j$ and the local scale $\sigma_i$ is selected by the local statistic of vertex $i$'s neighbourhood. We adopt the simple choice which sets $\sigma_i=d(x_i,x_M)$ and $x_M$ corresponds to $M$'th neighbour of vertex $i$. 
+
+Let $N_A$ denote the number of open facilities. Then the problem can be formulated as:
+\begin{eqnarray}
+\label{eqn:facility}
+\max_{A}H(A)=\sum_{i\in V}\max_{j \in A}w_{ij}-\sum_{j\in A}\phi_j \\
+s.t. \quad A \in J \in V, N_A\leqslant K \nonumber
+\end{eqnarray}
+
+The first term in equation~(\ref{eqn:facility}) measures the representativeness of $A$ and favours the patch $v_j$ which has larger similarity ( or well represent) its client patches. The second term is the penalty for extraneous facilities. It limits the size of set $A$ to make it more compact. $K$ is the maximum number of patches to be chosen for set $A$. It is specified by the user. Cost $\phi_j$ is set to be 1 for all vertex. This term encourage set $A$ to be representative and compact as shown in Figure~\ref{fig:fl}.
+
+\begin{figure}
+\begin{center}
+%\hspace{-0.3cm}
+\subfigure[]
+{
+\label{fig:fl:a}
+\includegraphics[width=0.47\linewidth]{fig/fl1.png}
+}
+%\hspace{-0.3cm}
+\subfigure[]
+{
+\label{fig:fl:b}
+\includegraphics[width=0.47\linewidth]{fig/fl2.png}
+}\\
+%\hspace{-0.3cm}
+\subfigure[]
+{
+\label{fig:fl:c}
+\includegraphics[width=0.47\linewidth]{fig/fl3.png}
+}
+%\hspace{-0.3cm}
+\subfigure[]
+{
+\label{fig:fl:d}
+\includegraphics[width=0.47\linewidth]{fig/fl4.png}
+}
+\end{center}
+%\vspace{-0.4cm}
+\caption{The facility location term for representative proposal selection (best viewed in color). The solid circles denote patches in the whole dataset. The distance between them reflects patches' similarity. The large empty circle labels the selected patch. (a)(b)(c): $a1, a2, a3$ are selected based on their marginal gains in $H(A\cup \{a\})-H(A)$ in three iterations. The selected $A$ is representative and compact. (d) shows selected patches and their client patches. Solid circles of different colors illustrate different clusters.}
+\label{fig:fl}
+%\vspace{-0.3cm}
+\end{figure}
+
+
+\subsubsection{Hierarchy Rewarding}
+Considering the hierarchical and multi-scale nature of objects, we propose to reward objectness likelihood by adding the following reward term to the objective function:
+\begin{eqnarray}
+\label{eqn:reward}
+R(A)=\sum_{l=1}^L\sqrt{\sum_{j\in V^l \bigcap A}r_j}
+\end{eqnarray}
+where $V^l$ is the set of candidates from layer $l$. Obviously, $\bigcup V^l=V$ and the $V^l$s are disjoint. The value $r_j$ estimates the likelihood of a candidate to be an object. We use CNN features to train a SVM model and compute a possibility score for each candidate. Scores of each layer are normalized into the same scale. $r_j$ reflects the priority of a segment in its layer. One can also learn a different weight for different layer. Here we simply use equal weights for all layers.
+
+\begin{figure}
+\begin{center}
+%\hspace{-0.3cm}
+   \includegraphics[width=0.9\linewidth]{fig/r.png}
+\end{center}
+%\vspace{-0.4cm}
+   \caption{The hierarchy rewarding for selecting object proposal from different scales (best viewed in color). Orange squares and pink dots denote elements from two different layers. $v_3$ is selected as it will result in maximum reward value compare to other unselected elements.}
+\label{fig:reward}
+%\vspace{-0.5cm}
+\end{figure}
+
+The reward term encourages the set to select high-quality proposals from different scales via leverage multi-scale information. As soon as an element is selected from a layer, other elements from the same layer start to have diminishing gain because of the square root function. A simple example is shown in Figure~\ref{fig:reward}. For instance, consider the case where $v_1,v_2,v_4\in V^1$, $v_3, v_5, ... \in V^2$, and $r_{v_1}=0.70, r_{v_2}=0.60$, and $r_{v_3}=0.50$. Assume $v_1$ is already in the selected set $A$  (it is more representative based on salient segment select term). Greedily selecting the next element will choose $v_3$ rather than $v_2$ since $\sqrt{0.70+0.60}=\sqrt{1.30}=1.14 \leq \sqrt{0.70}+\sqrt{0.50}=1.54$. 
+
+Intuitively, it will benefit more to select object proposals from a scale that has none of its elements already been chosen. For example, if we have two layers, each have more than 500 patches. If we already selected top 100 elements from layer 1, adding top 50 segments from layer 2 will bring more benefit than adding another 50 elements from layer 1.
+
+It is easy to show that $R(S)$ is submodular by using the composition rule from Theorem 1. The square root is non-decreasing concave function. Within each square root is a non-negative weights. This non-negative weights is monotone non-decreasing as we add components into it. The square root of such non-negative weights yields a submodular function and summing them up retains submodularity.
+
+%-------------------------------------------------------------------------
+\section{Optimization}
+We combine the salient candidate selection term and hierarchical reward term into a unified objective function as below:
+\begin{eqnarray}
+\label{eqn:obj}
+\max_A F(A)&=&\max_{A}H(A)+\lambda R(A)\\
+&=& \max_{A}\sum_{i\in V}\max_{j \in A} + \lambda \sum_{l=1}^L\sqrt{\sum_{j\in V^l \bigcap A}r_j} \nonumber \\
+&&-\sum_{j\in A}\phi_j \nonumber \\
+&&s.t. \quad A \subseteq V, N_A\leq K, \lambda \geq 0 \nonumber
+\end{eqnarray}
+
+The submodularity is preserved by taking non-negative linear combinations of the two submodular terms $H(A)$ and $R(A)$. Direct maximization of equation~(\ref{eqn:obj}) is a NP-hard problem~\cite{Galvao04}. We can solve the problem via a greedy algorithm~\cite{Galvao04,Nemhauser78} as it is submodular. 
+
+The algorithm starts from an empty set $A=\varnothing$. It adds the element $a^*$ which provides the largest marginal gain for $F(A)$ among the unselected elements to $A$ iteratively. The iteration stops when $|A|$ reaches the desired capacity number $K$ or $F(A)$ stops increasing. The optimization steps can be further accelerated using a lazy greedy approach from~\cite{Leskovec07}. Instead of recomputing gain for every unselected element after each iteration, an ordered list of marginal benefits will be kept from previous iteration. Top element will be re-evaluated and added to the set if its gain stays on top. The pseudo code is presented in Algorithm \ref{algorithm:alg1}.
+
+%\input{submodularAlgorithm}
+\begin{algorithm}
+  \caption{Submodular object proposal generation}
+  \label{algorithm:alg1}
+  \begin{algorithmic}
+  	\State \textbf{Input:} $I$, $G=(V,E)$, $w_{ij}$, $r_i$, $K$, $\lambda$
+  	\State \textbf{Output:} $A$ 
+  	\State Initialization: $A=\varnothing$, $\rho _i=0$, $x_i=0$
+    \While  {$|A|<K$} 
+    \State $a^*=arg\max_{\{A\cup a\}} F(A\cup \{a\})-F(A)$
+    \If{$F(A\cup \{a^*\})-F(A)\leq F(A)$}
+    \State break
+    \EndIf
+    \State $A \leftarrow A\cup {a^*}$, $\rho_{a^*}=0$
+    \For {$i \in  V \setminus A$}
+    	\State $\rho_i=\rho_i^{new}$
+    	\EndFor
+    \EndWhile  
+    \State load corresponding segment maps based on index set $A$
+  \end{algorithmic}
+\end{algorithm} 
+
+%------------------------------------------------------------------------
+%\input{experiment}
+\section{Experiments}
+We conduct experiments on the BSDS~\cite{Martin02} and PASCAL VOC2012~\cite{pascal-voc-2012} segmentation dataset. We adopt Best Spatial Support score (BSS) as~\cite{Endres14} to assess the quality for the object proposals on BSDS. For pascal dataset, we followed~\cite{Arbelaez14} and evaluate class level Jaccard index $J_c$ (mean over classes of the covering of all pixels of each class) and instance level Jaccard index $J_i$ (mean best overlap for all the ground-truth instances, BSS) on pascal dataset. 
+
+\subsection{Proposal evaluation}
+We first compare our proposal quality using bss metric and recall. As in our experiments, we set a pixel-wise overlap threshold of 50 percent as threshold. We showed the area under the ROC curve (AUC), the BSS and the recall at 50 percent in Table~\ref{tab:bsds}.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|l|l|l|l}
+\cline{1-4}
+ & AUC  & Recall & BSS  &  \\ \cline{1-4}
+C,T+layout~\cite{Endres14} & 77.5 & 83.4   & 67.2 &  \\ \cline{1-4}
+all feature~\cite{Endres14} & 80.2 & 79.7   & 66.2 &  \\ \cline{1-4}
+Ours & 81.1 & 83.6   & 71.8 &  \\ \cline{1-4}
+\end{tabular}
+\end{center}
+\caption{Comparison of object proposals on AUC, recall and BSS.}
+\label{tab:bsds}
+\end{table}
+
+We also compare our results with~\cite{Alexe12, Kim12, Carreira12, Arbelaez12, Sande11, Endres14, Arbelaez14}. At instance-level Jaccard index, our method outperform all other methods. At class-level Jaccard, we achieves the highest scores at most classes (14 out of 20). The result is shown in Table~\ref{tab:bssPascal}.  
+
+\begin{table*}\footnotesize
+% \tiny
+\begin{center}
+% \begin{tabular}{|L{0.35cm}|C{0.15cm}|C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} |C{0.2cm}|}
+% \hline
+% Method & N & Plane & Bike & Bird & Boat & Bottle & Bus & Car & Cat & Chair & Cow & Table & Dog & Horse & MBike & Person & Plant & Sheep & Sofa & Train & TV & Global \\
+\begin{tabular}{cc|p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}p{0.22cm}c}
+{Method}&{N}&{\begin{sideways}Plane\end{sideways}}&{\begin{sideways}Bike\end{sideways}}&{\begin{sideways}Bird\end{sideways}}&{\begin{sideways}Boat\end{sideways}}&{\begin{sideways}Bottle\end{sideways}}&{\begin{sideways}Bus\end{sideways}}&{\begin{sideways}Car\end{sideways}}&{\begin{sideways}Cat\end{sideways}}&{\begin{sideways}Chair\end{sideways}}&{\begin{sideways}Cow\end{sideways}}&{\begin{sideways}Table\end{sideways}}&{\begin{sideways}Dog\end{sideways}}&{\begin{sideways}Horse\end{sideways}}&{\begin{sideways}MBike\end{sideways}}&{\begin{sideways}Person\end{sideways}}&{\begin{sideways}Plant\end{sideways}}&{\begin{sideways}Sheep\end{sideways}}&{\begin{sideways}Sofa\end{sideways}}&{\begin{sideways}Train\end{sideways}}&{\begin{sideways}TV\end{sideways}}&{\begin{sideways}Global\end{sideways}} \\
+\hline
+Ours & 1100 & \textbf{82.0} & 48.8 & \textbf{84.7} & \textbf{76.9} & \textbf{71.4} & \textbf{81.0} & 68.0 & \textbf{92.8} & \textbf{70.0} & \textbf{86.0} & 78.3 & \textbf{89.5} & \textbf{83.0} & 77.3 & 73.2 & \textbf{70.2} & 77.9 & \textbf{85.6} & \textbf{84.7} & \textbf{87.6} & \textbf{76.6} \\
+\cite{Arbelaez14} & 1100 & 80.0 & 47.8 & 83.9 & 76.4 & 71.1 & 78.5 & \textbf{68.9} & 89.3 & 68.5 & 85.9 & 79.8 & 85.8 & 80.4 & 75.4 & \textbf{73.5} & 69.3 & \textbf{84.9} & 82.6 & 81.7 & 85.8 & 76.0 \\
+\cite{Endres14} & 1100 & 75.1 & \textbf{49.1} & 80.7 & 68.8 & 62.8 & 76.4 & 63.3 & 89.4 & 64.6 & 83.0 & \textbf{80.3} & 83.7 & 78.4 & \textbf{78.0} & 66.9 & 66.2 & 69.5 & 82.0 & 84.3 & 81.8 & 71.6 \\
+\cite{Arbelaez12} & 1100 & 74.4 & 46.6 & 80.5 & 69.4 & 64.6 & 73.5 & 61.2 & 89.0 & 65.1 & 80.5 & 78.4 & 85.2 & 77.2 & 70.6 & 67.9 & 68.8 & 73.5 & 81.6 & 75.8 & 82.0 & 71.4 \\
+\cite{Kim12} & 1100 & 73.8 & 40.6 & 75.8 & 66.7 & 52.7 & 79.7 & 50.6 & 91.2 & 59.2 & 80.2 & 80.7 & 87.4 & 79.0 & 74.7 & 62.1 & 54.6 & 65.0 & 84.6 & 82.4 & 79.5 & 67.4 \\
+\cite{Sande11} & 1100 & 68.3 & 39.6 & 70.6 & 64.8 & 58.0 & 68.2 & 51.8 & 77.6 & 58.2 & 72.6 & 70.4 & 74.0 & 66.2 & 59.9 & 59.8 & 55.4 & 67.7 & 71.3 & 68.6 & 78.7 & 63.1 \\
+\hline
+ours & 100 &  \\
+\cite{Arbelaez14} & 100 & 70.2 & 38.8 & 73.6 & 67.7 & 55.3 & 68.5 & 50.6 & 82.4 & 54.4 & 78.1 & 67.7 & 77.7 & 69.3 & 66.3 & 59.9 & 51.4 & 70.2 & 74.1 & 72.6 & 78.1 & 63.7 \\
+\cite{Endres14} & 100 & 70.6 & 40.8 & 74.8 & 59.9 & 49.6 & 65.4 & 50.4 & 81.5 & 54.5 & 74.9 & 68.1 & 77.3 & 69.3 & 66.8 & 56.2 & 54.3 & 64.1 & 72.0 & 71.6 & 69.9 & 61.7 \\
+\cite{Carreira12} & 100 & 72.7 & 36.2 & 73.6 & 63.3 & 45.4 & 67.4 & 39.5 & 84.1 & 47.7 & 73.2 & 64.0 & 81.1 & 72.2 & 64.3 & 52.8 & 42.9 & 62.2 & 72.9 & 74.3 & 69.5 & 59.0 \\
+\hline
+\end{tabular}
+\end{center}
+\caption{VOC2012 val set. Per-class and global bss at instance level}
+\label{tab:bssPascal}
+\end{table*}
+
+We compare our proposal generation time with MCG~\cite{Arbelaez14} which also utilizing multi-scale information. To generate and rank 5038 object proposals, our method takes 7 s compared to 10 s in~\cite{Arbelaez14}.
+
+\subsection{Semantic Segmentation and Object Detection}
+To analyze the efficacy of the object proposals generated by our approach in real object recognition tasks, we perform semantic segmentaion and object detection on Pascal VOC2012 validation set. We follow the settings in~\cite{Arbelaez14}, where 2000 object candidates are generated for each image using our algorithm. Then we extract CNN features for both the regions and their bounding boxes using the deep convolutional neural network model pretrained on ImageNet and finetuned on Pascal VOC2012 training set, the same as in~\cite{Arbelaez14}. These features are concatenated, then passed through linear classifiers trained for region and box classification tasks. After non-maxima suppression, we select the top 20,000 detections for each category. 
+
+The results are evaluated using the AP$^r$ and AP$^r_{vol}$ measures, where the AP$^r$ score is the average precision of whether a hypothesis overlaps with the groundtruth instance by over $50\%$, and the AP$^r_{vol}$ is the volume under the precision recall (PR) curve, which is more suitable for the simultaneous segmentation and detection task. The evaluation of detection task uses similar measures, denoted as the $AP^b$ and $AP^b_{vol}$, where $AP^b$ is the conventional evaluation metric for object detection. 
+
+Table~\ref{tab:sdsseg} and Table~\ref{tab:sdsaprvol} shows the AP$^r$ and AP$^r_{vol}$ results for each class. We can see that the results using our object proposals both our mean AP$^r$ and mean AP$^r_{vol}$ have achieved state of the art, and we outperform the previous methods in 14 out of 20 classes. Apart from the SDS, we neither fine tune different networks for regions and boxes nor refine the regions after classification. But our results not only outperforms the corresponding SDS-A but also the complicated SDS-B and SDS-C methods which finetuned two networks then finetuned as a whole. Moreover, on the more meaningful measurement of AP$^r_{vol}$ shown in Table~\ref{tab:sdsaprvol}, results based on our object proposals even outperforms that of SDS-C+ref, where the segments are refined within their $10\times 10$ grid using pretrained model with class prior. It shows the importance of good quality regions even before carefully designed feature extraction and region refinement after classification.  
+
+\begin{table*}[!htb]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}         
+\hline                               
+       & O$_2$P & SDS-A & SDS-B & SDS-C & Ours\\   
+\hline                               
+Plane & 56.5 & 61.8 & 65.7 & 67.4 & \textbf{68.2} \\                                     
+Bike & 19.0 & 43.4 & 49.6 & 49.6 & 14.0 \\                                      
+Bird & 23.0 & 46.6 & 47.2 & 49.1 & \textbf{64.7} \\                                    
+Boat & 12.2 & 27.2 & 30.0 & 29.9 & \textbf{51.3} \\                                     
+Bottle & 11.0 & 28.9 & 31.7 & 32.0 & \textbf{39.3} \\                                   
+Bus & 48.8 & 61.7 & 66.9 & 65.9 & 62.1 \\                                       
+Car & 26.0 & 46.9 & 50.9 & 51.4 & 45.6 \\                                      
+Cat & 43.3 & 58.4 & 69.2 & 70.6 & 65.8 \\                                       
+Chair & 4.7 & 17.8 & 19.6 & 20.2 & 9.9 \\                                       
+Cow & 15.6 & 38.8 & 42.7 & 42.7 & \textbf{49.1} \\                                       
+Table & 7.8 & 18.6 & 22.8 & 22.9 & \textbf{30.8} \\                                      
+Dog & 24.2 & 52.6 & 56.2 & 58.7 & \textbf{61.9} \\                                       
+Horse & 27.5 & 44.3 & 51.9 & 54.4 & \textbf{54.9} \\                                     
+MBike & 32.3 & 50.2 & 52.6 & 53.5 & \textbf{65.9} \\                                     
+Person & 23.5 & 48.2 & 52.6 & 54.4 & \textbf{54.5} \\                                    
+Plant & 4.6 & 23.8 & 25.7 & 24.9 & \textbf{31.8} \\                                      
+Sheep & 32.3 & 54.2 & 54.2 & 54.1 & 48.4 \\                                     
+Sofa & 20.7 & 26.0 & 32.2 & 31.4 & 29.5 \\                                      
+Train & 38.8 & 53.2 & 59.2 & 62.2 & \textbf{73.9} \\                                     
+TV & 32.3 & 55.3 & 58.7 & 59.3 & \textbf{65.6} \\ 
+\hline                                                                            
+Mean & 25.2 & 42.9 & 47.0 & 47.7 & \textbf{48.9} \\   
+\hline                               
+\end{tabular}  
+\end{center}                      
+\caption{Results on AP$^r$ on VOC2012 val. All numbers are $\%$}          
+\label{tab:sdsseg}
+\end{table*}    
+
+% \begin{table*}
+% \label{tab:sdsseg}
+% \tiny
+% \begin{center}
+% \begin{tabular}{|L{0.35cm}C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} |C{0.3cm}| C{0.3cm} |C{0.2cm}|}
+% \hline
+% Method & Plane & Bike & Bird & Boat & Bottle & Bus & Car & Cat & Chair & Cow & Table & Dog & Horse & MBike & Person & Plant & Sheep & Sofa & Train & TV & Mean \\
+% \hline\hline
+% O$_2$P &  56.5 & 19.0 & 23.0 & 12.2 & 11.0 & 48.8 & 26.0 & 43.3 &  4.7 & 15.6 &  7.8 & 24.2 & 27.5 & 32.3 & 23.5 &  4.6 & 32.3 & 20.7 & 38.8 & 32.3 & 25.2 \\
+% SDS-A  &  61.8 & 43.4 & 46.6 & 27.2 & 28.9 & 61.7 & 46.9 & 58.4 & 17.8 & 38.8 & 18.6 & 52.6 & 44.3 & 50.2 & 48.2 & 23.8 & 54.2 & 26.0 & 53.2 & 55.3 & 42.9 \\
+% SDS-B  &  65.7 & 49.6 & 47.2 & 30.0 & 31.7 & 66.9 & 50.9 & 69.2 & 19.6 & 42.7 & 22.8 & 56.2 & 51.9 & 52.6 & 52.6 & 25.7 & 54.2 & 32.2 & 59.2 & 58.7 & 47.0 \\
+% SDS-C  &  67.4 & 49.6 & 49.1 & 29.9 & 32.0 & 65.9 & 51.4 & 70.6 & 20.2 & 42.7 & 22.9 & 58.7 & 54.4 & 53.5 & 54.4 & 24.9 & 54.1 & 31.4 & 62.2 & 59.3 & 47.7 \\
+% Ours   & \textbf{68.2} & 14.0 &\textbf{64.7} &\textbf{51.3} &\textbf{39.3} & 61.1 & 45.6 & 65.8 &  9.9 &\textbf{49.1} &\textbf{30.8} &\textbf{61.9} &\textbf{54.9} &\textbf{65.9} &\textbf{54.5} &\textbf{31.8} & 48.4 & 29.5 &\textbf{73.9} &\textbf{65.6} & \textbf{48.9} \\
+% \hline
+% \end{tabular}
+% \end{center}
+% \caption{Results on AP$^r$ on VOC2012 val. All numbers are $\%$}
+% \end{table*}
+
+\begin{table*}[!htb]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|}         
+\hline                               
+       & O$_2$P & SDS-A & SDS-B & SDS-C & SDS-C+ref  & Ours\\   
+\hline                               
+Plane & 46.8 & 48.3 & 51.1 & 53.2 & 52.3 & \textbf{54.7} \\                                                  
+Bike & 21.2 & 39.8 & 42.1 & 42.1 & 42.6 & 19.4 \\                                                   
+Bird & 22.1 & 39.2 & 40.8 & 42.1 & 42.2 & \textbf{54.3} \\                                                   
+Boat & 13.0 & 25.1 & 27.5 & 27.1 & 28.6 & \textbf{40.9} \\                                                   
+Bottle & 10.1 & 26.0 & 26.8 & 27.6 & 28.6 & \textbf{34.4} \\                                                 
+Bus & 41.9 & 49.5 & 53.4 & 53.3 & 58.0 & 52.0 \\                                                    
+Car & 24.0 & 39.5 & 42.6 & 42.7 & 45.4 & 41.3 \\                                                    
+Cat & 39.2 & 50.7 & 56.3 & 57.3 & 58.9 & \textbf{59.3} \\                                                    
+Chair & 6.7 & 17.6 & 18.5 & 19.3 & 19.7 & 13.3 \\                                                   
+Cow & 14.6 & 32.5 & 36.0 & 36.3 & 37.1 & \textbf{42.9} \\                                                    
+Table & 9.9 & 18.5 & 20.6 & 21.4 & 22.8 & \textbf{25.8} \\                                                   
+Dog & 24.0 & 46.8 & 48.9 & 49.0 & 49.5 & \textbf{51.9} \\                                                    
+Horse & 24.4 & 37.7 & 41.9 & 43.6 & 42.9 & \textbf{44.8} \\                                                  
+MBike & 28.6 & 41.1 & 43.2 & 43.5 & 45.9 & \textbf{51.5} \\                                                  
+Person & 25.6 & 43.2 & 45.8 & 47.0 & 48.5 & 47.0 \\                                                 
+Plant & 7.0 & 23.4 & 24.8 & 24.4 & 25.5 & \textbf{31.4} \\                                                   
+Sheep & 29.0 & 43.0 & 44.2 & 44.0 & 44.5 & 42.6 \\                                                  
+Sofa & 18.8 & 26.2 & 29.7 & 29.9 & 30.2 & 28.5 \\                                                   
+Train & 34.6 & 45.1 & 48.9 & 49.9 & 52.6 & \textbf{59.2} \\                                                  
+TV & 25.9 & 47.7 & 48.8 & 49.4 & 51.4 & \textbf{53.8} \\      
+\hline                                               
+Mean & 23.4 & 37.0 & 39.6 & 40.2 & 41.4 & \textbf{42.4} \\     
+\hline                               
+\end{tabular}  
+\end{center}                      
+\caption{Results on AP$^r_{vol}$ on VOC2012 val. All numbers are $\%$}          
+\label{tab:sdsaprvol}
+\end{table*} 
+
+% \begin{table*}
+% \label{tab:sdsaprvol}
+% \tiny
+% \begin{center}
+% \begin{tabular}{|L{0.35cm}C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} C{0.3cm} |C{0.3cm}| C{0.3cm} |C{0.2cm}|}
+% \hline
+% Method & Plane & Bike & Bird & Boat & Bottle & Bus & Car & Cat & Chair & Cow & Table & Dog & Horse & MBike & Person & Plant & Sheep & Sofa & Train & TV & Mean \\
+% \hline\hline
+% O$_2$P &  46.8 & 21.2 & 22.1 & 13.0 & 10.1 & 41.9 & 24.0 & 39.2 &  6.7 & 14.6 &  9.9 & 24.0 & 24.4 & 28.6 & 25.6 &  7.0 & 29.0 & 18.8 & 34.6 & 25.9 & 23.4 \\
+% SDS-A  &  48.3 & 39.8 & 39.2 & 25.1 & 26.0 & 49.5 & 39.5 & 50.7 & 17.6 & 32.5 & 18.5 & 46.8 & 37.7 & 41.1 & 43.2 & 23.4 & 43.0 & 26.2 & 45.1 & 47.7 & 37.0 \\
+% SDS-B  &  51.1 & 42.1 & 40.8 & 27.5 & 26.8 & 53.4 & 42.6 & 56.3 & 18.5 & 36.0 & 20.6 & 48.9 & 41.9 & 43.2 & 45.8 & 24.8 & 44.2 & 29.7 & 48.9 & 48.8 & 39.6 \\
+% SDS-C  &  53.2 & 42.1 & 42.1 & 27.1 & 27.6 & 53.3 & 42.7 & 57.3 & 19.3 & 36.3 & 21.4 & 49.0 & 43.6 & 43.5 & 47.0 & 24.4 & 44.0 & 29.9 & 49.9 & 49.4 & 40.4 \\
+% SDS-C+ref  &  52.3 & 42.6 & 42.2 & 28.6 & 28.6 & 58.0 & 45.4 & 58.9 & 19.7 & 37.1 & 22.8 & 49.5 & 42.9 & 45.9 & 48.5 & 25.5 & 44.5 & 30.2 & 52.6 & 51.4 & 41.4 \\
+% Ours   &  54.7 & 19.4 & 54.3 & 40.9 & 34.4 & 52.0 & 41.3 & 59.3 & 13.3 & 42.9 & 25.8 & 51.8 & 44.8 & 51.5 & 47.0 & 31.4 & 42.6 & 28.5 & 59.2 & 53.8 & 42.4 \\
+% \hline
+% \end{tabular}
+% \end{center}
+% \caption{Results on AP$^r_{vol}$ on VOC2012 val. All numbers are $\%$}
+% \end{table*}
+
+Table~\ref{tab:sdsdet} shows the the $AP^b$ and $AP^b_{vol}$ results for object detection. We achived better results compared to R-CNN~\cite{girshick14CVPR} and SDS, and it shows that better region proposals not only can improve segmentation but also gives better localization of objects. 
+\begin{table*}[!htb]                               
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}                    
+\hline                                          
+ & R-CNN~\cite{girshick14CVPR} & R-CNN-MCG & SDS-A & Ours \\          
+\hline                                          
+Mean AP$^b$ & 51.0 & 51.7 & 51.9 & \textbf{52.4} \\        
+\hline                                          
+Mean AP$^b_{vol}$ & 41.9 & 42.4 & 43.2 & \textbf{44.3} \\
+\hline                                          
+\end{tabular}     
+\end{center}                              
+\caption{Results on AP$^b$ and AP$^b_{vol}$ on VOC2012 val. All numbers are $\%$}                        
+\label{tab:sdsdet}                      
+\end{table*}  
+
+%------------------------------------------------------------------------
+\section{Conclusion}
+We have presented an accurate and efficient approach to extract multi-scale object proposals. By integrating a hierarchical reward term, we solve a monotonically increasing and submodular objective function to select salient object proposals from different scales. The problem is optimized via a highly efficient greedy algorithm. The experimental results show that our method achieves state-of-art object-level accuracy while computationally more efficient on the BSDS dataset and PASCAL VOC2012 segmentation dataset. We further test our object proposals on simultaneous detection and segmentation task and achieve better performance than object proposals generated from other existing methods. We further evaluate our object proposals by using them as input for the simultaneous detection and segmentation~\cite{Hariharan14} task. 
+
+{\small
+\bibliographystyle{ieee}
+\bibliography{egbib}
+}
+
+\end{document}

@@ -1,0 +1,7 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Related Work}{}% 2
+\BOOKMARK [1][-]{section.3}{Approach}{}% 3
+\BOOKMARK [2][-]{subsection.3.1}{Context Driven Object Search as Markov Decision Process \(MDP\)}{section.3}% 4
+\BOOKMARK [2][-]{subsection.3.2}{Reward Function}{section.3}% 5
+\BOOKMARK [2][-]{subsection.3.3}{Learning Context Driven Search Policy}{section.3}% 6
+\BOOKMARK [2][-]{subsection.3.4}{Context Modeling}{section.3}% 7
