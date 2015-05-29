@@ -15,6 +15,7 @@
 %\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
 \newtheorem{mydef}{Definition}
 \newcommand{\CXNote}[1]{\textbf{[Stephen: {#1}]}}
+\newcommand{\HHNote}[1]{\textbf{[hhe: {#1}]}}
 
 
 \title{Searching for Objects in 20 Questions}
@@ -64,7 +65,7 @@ College Park, MD 20742 \\
 
 \begin{abstract}
 We propose a new strategy for simultaneous object detection and segmentation. Instead of evaluating classifiers for all possible locations of objects in the
-image, we develop a divide-and-conquer approach by sequentially posing questions about the query and related context, like playing a “Twenty Questions” game, to decide where to search for the object. We formulate the problem as an Markov Decision Process (MDP) and learn a policy using reinforcement learning that can dynamically select questions based on the query, the scene and current observed responses given by object detectors and classifiers. The algorithm reduces about 30\% of the object proposals evaluation while maintaining high average precision. Experiments show promising results compared with baselines of exhaustive search, searching for objects in random sequences and random locations.
+image, we develop a divide-and-conquer approach by sequentially posing questions about the query and related context, like playing a ``Twenty Questions'' game, to decide where to search for the object. We formulate the problem as a Markov Decision Process (MDP) and learn a policy using reinforcement learning that can dynamically select questions based on the query, the scene and current observed responses given by object detectors and classifiers. The algorithm reduces about 30\% of the object proposals evaluation while maintaining high average precision. Experiments show promising results compared with baselines of exhaustive search, searching for objects in random sequences and random locations.
 \end{abstract}
 
 %%%%%%%%% BODY TEXT
