@@ -42,8 +42,6 @@
 \citation{arbelaez2014multiscale}
 \citation{girshick14CVPR}
 \citation{BharathECCV2014}
-\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}}
-\newlabel{sec:relatedwork}{{2}{2}{Related Work}{section.2}{}}
 \citation{gould2009decomposing}
 \citation{galleguillos2010context}
 \citation{mottaghirole}
@@ -51,6 +49,8 @@
 \citation{ladicky2010graph}
 \citation{galleguillos2010context}
 \citation{chen2011piecing}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}}
+\newlabel{sec:relatedwork}{{2}{2}{Related Work}{section.2}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {3}Approach}{3}{section.3}}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Framework of our context driven object searching. We first generate region hypotheses using object proposal algorithms, then the policy evaluates the current state and iteratively selects the action maximizing the Q-value function. Afterwards, the possible search locations are updated and the posterior probabilities of each category are evaluated for the next state.}}{3}{figure.1}}
 \newlabel{fig:flowchart}{{3}{3}{Approach}{figure.1}{}}
@@ -63,15 +63,15 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Learning Context Driven Search Policy}{4}{subsection.3.3}}
 \newlabel{eq:bellman}{{3}{4}{Learning Context Driven Search Policy}{equation.3.3}{}}
 \newlabel{eq:qvalue}{{4}{4}{Learning Context Driven Search Policy}{equation.3.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Context Modeling}{4}{subsection.3.4}}
+\newlabel{sec:context}{{3.4}{4}{Context Modeling}{subsection.3.4}{}}
 \bibstyle{ieee}
 \bibdata{nips2015}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Context Modeling}{5}{subsection.3.4}}
-\newlabel{sec:context}{{3.4}{5}{Context Modeling}{subsection.3.4}{}}
+\bibcite{bogdan2012context}{1}
+\bibcite{arbelaez2014multiscale}{2}
 \newlabel{eq:votemap}{{6}{5}{Context Modeling}{equation.3.6}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Examples of our weighted vote map for the context from sky to boat. The first rows are the training sample pairs of sky and boat and the second row is the test image and the resulted weighted voting map. The widths of the arrows denote the weighted similarity $W(s_{c_t}^i,s;\theta ^W)$ between the test segment of sky (highlighted in yellow) and a training instance of sky segment (in light blue)}}{5}{figure.2}}
 \newlabel{fig:vote_sky_boat}{{2}{5}{Examples of our weighted vote map for the context from sky to boat. The first rows are the training sample pairs of sky and boat and the second row is the test image and the resulted weighted voting map. The widths of the arrows denote the weighted similarity $W(s_{c_t}^i,s;\theta ^W)$ between the test segment of sky (highlighted in yellow) and a training instance of sky segment (in light blue)}{figure.2}{}}
-\bibcite{bogdan2012context}{1}
-\bibcite{arbelaez2014multiscale}{2}
 \bibcite{barto1998reinforcement}{3}
 \bibcite{biederman1982scene}{4}
 \bibcite{blanchard2005hierarchical}{5}
@@ -88,11 +88,11 @@
 \bibcite{sergey2012timely}{16}
 \bibcite{ladicky2010graph}{17}
 \bibcite{lampert2009efficient}{18}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Examples of our context vote maps. Each pair of images corresponds to the original image and the vote-based probability map of object location from observed context. From (a) - (d) are the vote maps from water to boat, sky to boat, road to car and grass to cow, respectively. Best viewed in color.}}{6}{figure.3}}
-\newlabel{fig:votemap}{{3}{6}{Examples of our context vote maps. Each pair of images corresponds to the original image and the vote-based probability map of object location from observed context. From (a) - (d) are the vote maps from water to boat, sky to boat, road to car and grass to cow, respectively. Best viewed in color}{figure.3}{}}
 \bibcite{moores2003associative}{19}
 \bibcite{mottaghirole}{20}
 \bibcite{najemnik2005optimal}{21}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Examples of our context vote maps. Each pair of images corresponds to the original image and the vote-based probability map of object location from observed context. From (a) - (d) are the vote maps from water to boat, sky to boat, road to car and grass to cow, respectively. Best viewed in color.}}{6}{figure.3}}
+\newlabel{fig:votemap}{{3}{6}{Examples of our context vote maps. Each pair of images corresponds to the original image and the vote-based probability map of object location from observed context. From (a) - (d) are the vote maps from water to boat, sky to boat, road to car and grass to cow, respectively. Best viewed in color}{figure.3}{}}
 \bibcite{parikh2012exploring}{22}
 \bibcite{shotton2006textonboost}{23}
 \bibcite{van2011segmentation}{24}
