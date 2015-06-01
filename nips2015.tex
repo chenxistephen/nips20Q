@@ -27,17 +27,17 @@ Department of Computer Science\\
 University of Maryland\\
 College Park, MD 20742 \\
 \texttt{chenxi@umiacs.umd.edu} \\
-\And
-Gregory Shakhnarovich\\
-Toyota Technological Institute at Chicago \\
-Chicago, IL\\
-\texttt{gregory@ttic.edu} \\
 \AND
 He He \\
 Department of Computer Science\\
 University of Maryland\\
 College Park, MD 20742 \\
 \texttt{hhe@cs.umd.edu} \\
+\And
+Gregory Shakhnarovich\\
+Toyota Technological Institute at Chicago \\
+Chicago, IL\\
+\texttt{gregory@ttic.edu} \\
 \And
 Larry S. Davis \\
 Department of Computer Science\\
@@ -65,7 +65,7 @@ College Park, MD 20742 \\
 
 \begin{abstract}
 We propose a new strategy for simultaneous object detection and segmentation. Instead of evaluating classifiers for all possible locations of objects in the
-image, we develop a divide-and-conquer approach by sequentially posing questions about the query and related context, like playing a ``Twenty Questions'' game, to decide where to search for the object. We formulate the problem as a Markov Decision Process (MDP) and learn a policy using reinforcement learning that can dynamically select questions based on the query, the scene and current observed responses given by object detectors and classifiers. The algorithm reduces about 30\% of the object proposals evaluation while maintaining high average precision. Experiments show promising results compared with baselines of exhaustive search, searching for objects in random sequences and random locations.
+image, we develop a divide-and-conquer approach by sequentially posing questions about the query and related context, like playing a ``Twenty Questions'' game, to decide where to search for the object. We formulate the problem as a Markov Decision Process (MDP) and learn a policy using imitation learning that can dynamically select questions based on the query, the scene and current observed responses given by object detectors and classifiers. The algorithm reduces over 30\% of the object proposals evaluation while maintaining high average precision comparable to exhaustive search. Experiments show promising results compared with baselines of exhaustive search, searching for objects in random sequences and random locations.
 \end{abstract}
 
 %%%%%%%%% BODY TEXT
@@ -73,7 +73,7 @@ image, we develop a divide-and-conquer approach by sequentially posing questions
 \input{relatedwork}
 % \input{overview}
 \input{approach}
-% \input{experiment}
+\input{experiment}
 % \input{conclusion}
 
 
