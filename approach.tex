@@ -70,9 +70,9 @@ Since the space of possible states $S$ is intractable, we use a linear function 
 Q^{\pi}(s,a) = \theta_\pi^T \phi(s,a) 
 \end{eqnarray}
 
-where $\phi(s,a) = \phi((X, R^t),a) = \phi(X^t,a)$ is the feature of the undetermined area $X^t$ at time $t$ after observing detector responses of $a_1,...,a_t$. 
+where $\phi(s,a) = \phi((X, R^t),a) = \phi(X^t,a)$ is the feature of the underlying area $X^t$ at time $t$ after observing detector responses of $a_1,...,a_t$. 
 
-The parameters $\theta_\pi$ are learned by \textit{policy iteration}. We collect $(s,a,r,s')$ samples by running episodes starting from a random or empty state, then we search and prune in the tree of states and collect states samples  and corresponding features. An SVM regression is trained for each class to predict the Q-values given current states.
+The parameters $\theta_\pi$ are learned by \textit{policy iteration}. We collect $(s,a,r,s')$ samples by running episodes starting from a random or empty state, then we search and prune in the tree of states and collect states samples  and corresponding features. To prevent overfitting, an $L_2$ regularized regression is trained for each class to predict the Q-values given current states.
 
 \subsection{Context Modeling}
 \label{sec:context}
@@ -93,7 +93,7 @@ where $s\in X^t$ is a region within the search space of the context class $c_t$.
 
 \begin{figure}[ht!]
 \begin{center}
-\includegraphics[width=\linewidth]{figures/vote_sky_boat.pdf}
+\includegraphics[width=0.6\linewidth]{figures/vote_sky_boat.pdf}
 \end{center}
 \caption{Examples of our weighted vote map for the context from sky to boat. The first rows are the training sample pairs of sky and boat and the second row is the test image and the resulted weighted voting map. The widths of the arrows denote the weighted similarity $W(s_{c_t}^i,s;\theta^W)$ between the test segment of sky (highlighted in yellow) and a training instance of sky segment (in light blue)}
 \label{fig:vote_sky_boat}
@@ -102,7 +102,7 @@ where $s\in X^t$ is a region within the search space of the context class $c_t$.
 
 \begin{figure}[ht!]
 \begin{center}
-\includegraphics[width=\linewidth]{figures/votemap.pdf}
+\includegraphics[width=0.6\linewidth]{figures/votemap.pdf}
 \end{center}
 \caption{Examples of our context vote maps. Each pair of images corresponds to the original image and the vote-based probability map of object location from observed context. From (a) - (d) are the vote maps from water to boat, sky to boat, road to car and grass to cow, respectively. Best viewed in color.}
 \label{fig:votemap}
