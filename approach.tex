@@ -1,14 +1,18 @@
 \section{Approach}
+\HHNote{This paragraph needs a better structure. Also, some concepts are not defined.}
 
-Our framework is shown in Figure~\ref{fig:flowchart}. Our goal is to learn a policy $\pi(s)$ that can dynamically determine a sequence of contextual classes to detect to help narrow down the search area of the query or make an early rejection, under certain budget constraint. We model it in a reinforcement learning framework by introducing the Markov Decision Process (MDP), which defines a single \textit{episode} of selecting actions for the input image $X$ and target query class $c_q$.
+Our framework is shown in Figure~\ref{fig:flowchart}\HHNote{Mention the figure when you plan to explain it. Maybe after the high level description of the approach.}. Our goal is to learn \HHNote{policy is not defined yet. Maybe have a background subsection for MDP first? or don't mention policy at all, just say we want to dynamically ...}a policy $\pi(s)$ that can dynamically determine a sequence \HHNote{``determine a sequence'' is confusing because it does not predict a ``sequence''. Consider: sequentially select a contextual object class to detect ...}of contextual \HHNote{object class?} classes to detect to help \HHNote{help whom? I'd just say to narrow
+down}narrow down the search area of the query or
+make an early rejection, under certain budget constraint\HHNote{Too long, hard to read. Perhaps break into: ... object class under budget constraints, which narrows down...}. We model it in a reinforcement learning framework by introducing the Markov Decision Process (MDP) \HHNote{Model the problem as a MDP and use RL to solve it}, which defines a single \textit{episode} \HHNote{not sure what episode means hear..}of selecting actions for the input image $X$ and target query class
+$c_q$ \HHNote{$X$ and $c_q$ are not used here and they will be defined in the next section. Consider removing the notations}.
 
 \begin{figure*}[htb]
 \begin{center}
 \includegraphics[width=\linewidth]{figures/flowchart_Q.pdf}
 \caption{Framework of our context driven object searching. We first generate region hypotheses using object proposal algorithms, then the policy evaluates the current state and iteratively selects the action maximizing the Q-value function. Afterwards, the possible search locations are updated and the posterior probabilities of each category are evaluated for the next state.}
+\label{fig:flowchart}
 \end{center}
 
-\label{fig:flowchart}
 \end{figure*}
 
 \subsection{Context Driven Object Search as Markov Decision Process (MDP)}
@@ -16,12 +20,12 @@ Our framework is shown in Figure~\ref{fig:flowchart}. Our goal is to learn a pol
 
 Specifically, given an image $X$ and a query object class $c_q$ in classes ${1,..,C}$, we define the MDP as follows.
 \begin{mydef}
- The \textbf{detection action selection MDP} consists of the tuple $(\mathcal{S}, \mathcal{A}, T(.), R(.), \gamma)$:
+ The \textbf{detection action selection MDP} is defined by the tuple $(\mathcal{S}, \mathcal{A}, T(.), R(.), \gamma)$:
 \begin{itemize}
-\item \textbf{State} $s(t) = (X, R^t)\in \mathcal{S}$ that includes the image $X$ and the observations $R^t= \{r_1, r_2, ....,r_t\}$ over time till $t$.
-\item The set of \textbf{actions} $\mathcal{A} = \{a_1, ..., a_C, Stop, Reject\} $, where $a_i$ is to detect class $c_i$, \textit{Reject} to reject query class in the image, and \textit{Stop} to output the search area and run query detector.
-\item \textbf{State transition} function $T(s'|s,a, X)$
-\item The \textbf{reward} function $R(s,a,s') \rightarrow \mathbb{R}$.
+\item \textbf{State} \HHNote{I would give some explanation of what state is before the math, e.g. a state contains necessary information for decision making}$s(t) = (X, R^t)\in \mathcal{S}$ that includes the image $X$ and the observations $R^t= \{r_1, r_2, ....,r_t\}$ over time till $t$.
+\item The set of \textbf{actions} \HHNote{Again, some explanation: actions to be taken in each state}$\mathcal{A} = \{a_1, ..., a_C, \mbox{Stop}, \mbox{Reject}\} $, where $a_i$ is to detect class $c_i$\HHNote{Be more precise: what does detect mean: run the detector of class $c_i$ only? also give proposals?}, \textit{Reject} to reject \HHNote{if the process terminates after Reject, be explicit about it}query class in the image, and \textit{Stop} to output the search area and run query detector.
+\item \textbf{State transition} function $T(s'|s,a, X)$ \HHNote{That's it? Need some explanation}
+\item The \textbf{reward} function $R(s,a,s') \rightarrow \mathbb{R}$. \HHNote{That's it? Need some explanation}
 \item The \textbf{discount} constant $\gamma$ defines a tradeoff between taking the action by greedily maximizing the immediate reward or the considering the long term expected reward.
 \end{itemize}
 \end{mydef}
@@ -31,9 +35,12 @@ Specifically, given an image $X$ and a query object class $c_q$ in classes ${1,.
 % 
 % \end{def}
 
-During test time, our search policy $\pi(s): \mathcal{S} \rightarrow \mathcal{A}$ iteratively selects an action $a^t$ in the action space $\mathcal{A}$. %= \{a_1, ..., a_C, Stop, Reject\} $, . 
+\HHNote{Policy is not defined. Add something like: a policy (math) is a mapping from a state to an action. The goal of an MDP is to find a policy that maxmizes ...}
+
+During test time, our search policy $\pi(s): \mathcal{S} \rightarrow \mathcal{A}$ iteratively selects an action $a^t$ in the action space $\mathcal{A}$ \HHNote{Consider $a^t \in \mathcal{A}$}. %= \{a_1, ..., a_C, Stop, Reject\} $, . 
 Then the policy obtains response $r_t$ at time step $t$ given by the detection or classification results of action $a_t$. 
 
+\HHNote{The causal relation ``since ... we want ... then define a policy'' here doesn't seem to be right. Policy and Q-value are defined by the MDP.} 
 Formally, since we would like to select the actions dynamically, we want to learn a value function taking action $a$ in state $s$ under the policy $\pi$, denoted $Q^\pi(s,a): S\times A \rightarrow \mathbb{R}$, where $S$ is the space of all possible states, to assign a value to a potential action $a\in A$ given the current state. We can then define policy $\pi$ to take the action that maximizes the expected value:
 
 \begin{eqnarray}
@@ -57,14 +64,14 @@ where $X^{t+1}_i$ is the updated search area after executing action $a_i$ in sta
 
 
 \subsection{Learning Context Driven Search Policy}
-We propose a policy to use maximum expected reward to select $a_t$. To learn such a policy, we adopt a standard Q-learning algorithm~\cite{barto1998reinforcement}, where the action-value function is estimated by using the Bellman equation iteratively:
+We propose a policy to use maximum expected reward to select $a_t$. To learn such a policy, we adopt a standard Q-learning algorithm~\cite{barto1998reinforcement}, where the action-value function is estimated by the Bellman equation recursively:
 \begin{eqnarray}
 \label{eq:bellman}
 Q^*(s,a) = \mathbb{E}_{s'\sim \xi} \big[ R + \gamma \max_{a'} Q^*(s',a')|s,a \big]
 \end{eqnarray}
 where $a'$ and $s'\in\xi$ is the possible action-state pairs at the next time steps $t+1$.
 
-Since the space of possible states $S$ is intractable, we use a linear function of the features of the states to approximate the $Q$-values:
+Since the space of possible states $S$ is intractable \HHNote{The state space is continuous}, we use a linear function of the features of the states to approximate the $Q$-values \HHNote{linear approximation of the Q-values}:
 \begin{eqnarray}
 \label{eq:qvalue}
 Q^{\pi}(s,a) = \theta_\pi^T \phi(s,a) 
