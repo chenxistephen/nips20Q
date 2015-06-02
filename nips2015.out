@@ -1,7 +1,9 @@
 \BOOKMARK [1][-]{section.1}{Introduction}{}% 1
-\BOOKMARK [1][-]{section.2}{Related Work}{}% 2
+\BOOKMARK [1][-]{section.2}{Problem Formulation}{}% 2
 \BOOKMARK [1][-]{section.3}{Approach}{}% 3
-\BOOKMARK [2][-]{subsection.3.1}{Context Driven Object Search as Markov Decision Process \(MDP\)}{section.3}% 4
-\BOOKMARK [2][-]{subsection.3.2}{Reward Function}{section.3}% 5
-\BOOKMARK [2][-]{subsection.3.3}{Learning Context Driven Search Policy}{section.3}% 6
-\BOOKMARK [2][-]{subsection.3.4}{Context Modeling}{section.3}% 7
+\BOOKMARK [2][-]{subsection.3.1}{Learning the Policy by Imitation}{section.3}% 4
+\BOOKMARK [2][-]{subsection.3.2}{Context Modeling}{section.3}% 5
+\BOOKMARK [1][-]{section.4}{Implementation Details}{}% 6
+\BOOKMARK [2][-]{subsection.4.1}{Object Proposals}{section.4}% 7
+\BOOKMARK [2][-]{subsection.4.2}{Datasets}{section.4}% 8
+\BOOKMARK [1][-]{section.5}{Related Work}{}% 9
