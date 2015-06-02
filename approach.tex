@@ -136,10 +136,3 @@ p(c_t|c,X) = \sum_{s\in X^t} p(c_t|X_s)\sum_i W(s_{c_t}^i,s;\theta^W).T(b_{c_t}^
 where $p(c_t|X_s)$ is the probabilities of $s$ as class $c_t$ after taking the action $a_t$ to run classification at time $t$.
 
 
-\section{Implementation Details}
-\subsection{Object Proposals}
-We use MCG object proposals in~\cite{arbelaez2014multiscale} as object candidates. Since the object proposals mainly covers the objects,  we also generate a small amount (20$\sim$30 per image) of segments using stable segmentation algorithm in~\cite{chen2011piecing} to cover the whole scene including contextual classes. To reduce the run-time retrieval overhead, our context voting step uses only the stable segments. The stable segmentation gives a coarse level of object/context division and can reduce the computation complexity of context voting compared to the large number of finer object proposals, while still maintains a semantically reasonable context inference. 
-
-\subsection{Datasets}
-We conduct our training and experiments on the Pascal VOC dataset.~\cite{Everingham10} which is a \textit{de facto} benchmark for object detection for years. Since the original dataset does not provide annotation of segmentation and contextual classes, we train our policy using the Pascal Context dataset~\cite{mottaghi2014role} which fully annotates the every pixels of the Pascal VOC 2010 train and validation sets, with additional contextual classes, which is perfectly good for our task. We use the 33 context classes and train our policy on the Pascal Context training set, and test our algorithm and baselines on the validation set. We also test our policy on the MSRC dataset~\cite{shotton2006textonboost} to show our algorithm can generalize to different data. 
-
