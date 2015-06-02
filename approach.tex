@@ -16,13 +16,13 @@ the optimal $Q$-value is recursively defined as $Q^\ast(s_t, a_t) = R(s_t, a_t) 
 Given an image $X$ and a query object class $c_q$ ($q \in {1,..,C}$),
 we detect the query class of objects by sequentially making decision of exploring one context/object class, and narrow down the search area for the query based on observed responses. Our framework is shown in Figure~\ref{fig:flowchart}.
 We model our problem as an MDP.
-Our \textbf{state} $s_t$ is $(X, O^t)$, where  $O^t= \{x_1, x_2, ....,x_t\}$ is a sequence of observations.
+Our \textbf{state} $s_t$ is $(X, O^t)$, where  $O^t= \{o_1, o_2, ....,o_t\}$ is a sequence of observations.
 The \textbf{action} set is $\{d_1, ..., d_C, \mbox{Stop}, \mbox{Reject}\}$, where $d_i$ is to run the detector of class $c_i$, ``Reject'' is to reject the query class and terminate the process\HHNote{Instead of ``terminate'', maybe say ``output not found'', I'm not sure what's the correct way to say not found in this context.}, and ``Stop'' is to run the detector of the query class on the refined search area and output the result.
 The \textbf{state transition} is deterministic in our case.
 We define the \textit{reward} $R$ as the immediate gain in intersection/union of the search space:
 \begin{eqnarray}
 \label{eq:imreward}
-R(s_t,a_t) =  \frac{X^{t+1}_i \cap X_q}{X^{t+1}_i \cup X_q} - \frac{X^{t}_i \cap X_q}{X^{t}_i \cup X_q}
+R(s_t,a_t) =  \frac{X^{t+1} \cap X_q}{X^{t+1} \cup X_q} - \frac{X^{t}\cap X_q}{X^{t} \cup X_q}
 \end{eqnarray}
 where $X^{t+1}_i$ is the updated search area after executing action $a_t$ in state $s_t$, determined by the context models described in Section~\ref{sec:context}. $X_q$ is the groundtruth mask of the query object instances in the image. 
 
@@ -97,15 +97,15 @@ We collect examples $(s,a,r)$ samples from the oracle's trajectory and use ridge
 \label{sec:context}
 Since our task is not only to detect the object but also refine the search space of the query in the image as accurately as possible, conventional modeling of context as simple co-occurrence statistics is inadequate. Instead we present a data-driven location aware approach to represent the spatial correlation between the objects and the scene. 
 
-Here we formulate the context $p(c_t|c,X)$ as a posterior of the probabilistic vote map $p(c|c_t,X_s)$ defined on each pixel $(x_i,x_j)\in X$ over the image, and the responses of class $c_t$ after action $a_t$:
+Given an action $a_t$ to detect context class $c_t$ at time $t$, $X_c \subset X$ is the exploration area for context, here we formulate the context $p(c|c_t,X)$ as a posterior of the probabilistic vote map $p(c_t|c,X_c)$ defined on each pixel $(x_i,x_j)\in X$ over the image, and the responses of class $c_t$ after action $a_t$:
 \begin{eqnarray}
-p(c_t|c,X) = \sum_{s\in X^t} p(c|c_t,X_s)p(c_t|X_s)
+p(c_t|c,X) = \sum_{X_c \subset X} p(c|c_t,X_c)p(c_t|X_c)
 \end{eqnarray}
 
-Given a refined search space $X^t\in X$ of a context class $c_t$ at time $t$, we formalize $p(c|c_t,X)$ as a weighted vote from the cooccurring region pairs of class $c_t$ and $c$ in training scenes. Let $(s_{c_t}^i, s_c^i)$ be the $i$-th pair of co-occurring regions of class $c_t$ and $c$, and $b_{c_t}^i$ and $b_c^i$ be the corresponding bounding boxes. We can now define the probabilistic vote map $p(c|c_t,X)$ as:
+Given a refined search space $X_c\in X$ of a context class $c_t$ at time $t$, we formalize $p(c|c_t,X)$ as a weighted vote from the cooccurring region pairs of class $c_t$ and $c$ in training scenes. Let $(s_{c_t}^i, s_c^i)$ be the $i$-th pair of co-occurring regions of class $c_t$ and $c$, and $b_{c_t}^i$ and $b_c^i$ be the corresponding bounding boxes. We can now define the probabilistic vote map $p(c|c_t,X)$ as:
 \begin{eqnarray}
 \label{eq:votemap}
-p(c|c_t,X_s)_{s\in X^t} = \frac{1}{Z_c}\sum_i W(s_{c_t}^i,s;\theta^W).T(b_{c_t}^i,b_c^i)
+p(c|c_t,X_c)_{s\in X^t} = \frac{1}{Z_c}\sum_i W(s_{c_t}^i,s;\theta^W).T(b_{c_t}^i,b_c^i)
 \end{eqnarray}
 where $s\in X^t$ is a region within the search space of the context class $c_t$. $Z_c$ is the normalization function. $W(.)$ is a kernel measuring similarity of region $s$ with a training region $s_i$. $T(b_{c_t}^i,b_c^i)$ models the transformation from $b_{c_t}^i$ to $b_c^i$, including translation and scaling. Figure~\ref{fig:votemap} shows a few examples of the vote maps. We can see that with the exemplar based and semantically aware voting, the resulted vote maps give more accurate search area of the query objects.
 
@@ -131,8 +131,19 @@ where $s\in X^t$ is a region within the search space of the context class $c_t$.
 
 The final context probabilistic vote map is given by
 \begin{eqnarray}
-p(c_t|c,X) = \sum_{s\in X^t} p(c_t|X_s)\sum_i W(s_{c_t}^i,s;\theta^W).T(b_{c_t}^i,b_c^i)\nonumber\\
+p(c_t|c,X) = \sum_{s\in X_c} p(c_t|X_c)\sum_i W(s_{c_t}^i,s;\theta^W).T(b_{c_t}^i,b_c^i)\nonumber\\
 \end{eqnarray}
-where $p(c_t|X_s)$ is the probabilities of $s$ as class $c_t$ after taking the action $a_t$ to run classification at time $t$.
+where $p(c_t|X_c)$ is the probabilities of $s$ as class $c_t$ after taking the action $a_t$ to run classification at time $t$.
 
 
+\subsection{Update Responses and Search Area}
+After taking action $a_t$ and receiving response $o_t = p(c_t|c, X)$ from context class $c_t$, we integrate the response into observations from previous sequence of actions. Assuming the detectors and context classifiers are trained independently per category, the aggregated responses can be modeled as:
+\begin{eqnarray}
+p(O^t|c, X) = \prod_t p(c_t|c,X)
+\end{eqnarray}
+
+We then update the search area for the query class $c_q$ in a probabilistic framework:
+\begin{eqnarray}
+p(c_q|X,O^t) = \frac{p(O^t|c_q,X)p(c_q|X)}{Z}
+\end{eqnarray}
+where $Z = \sum_c^{C^t} p(O^t|c,X)p(c|X)$ is the normalization function， $p(c|X)$ is obtained by taking actions and running context classifiers over the context segments,  and $C^t = \{c_1, c_2, ..., c_t, c_q\}$ are the set of observed contextual classes.
