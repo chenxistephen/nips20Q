@@ -3,12 +3,11 @@ A sequential decision-making problem can be formulated as a Markov Decision Proc
 
 In imitation learning, we define an oracle that executes policy $\pi^*$ and demonstrates action $a_s^* = \arg \min_{a\in A} C(s,a)$ in state $s$, where $C(s,a)$ is the oracles measure of the quality of $a$ given $s$. We use the Q-value of the state-action pair as $C(s,a)$ in this paper. The learner attempts to imitates the oracle's behavior without notion of the task loss function. Thus minimizing the task loss is reduced to minimizing a \textit{surrogate loss} with respect to the oracle's policy.
 
-
 \section{Approach}
 
-Our framework is shown in Figure~\ref{fig:flowchart}. % \HHNote{Mention the figure when you plan to explain it. Maybe after the high level description of the approach.}. 
-Under certain budget constraint, our goal is to learn a policy $\pi(s)$ that can sequentially select a contextual object class to detect  to narrow down the search area of the query or
-make an early rejection. We model the problem as a MDP and use reinforcement learning, specifically imitation learning to solve it. % which defines a single \textit{episode} \HHNote{not sure what episode means hear..}of selecting actions for the input image $X$ and target query class $c_q$ \HHNote{$X$ and $c_q$ are not used here and they will be defined in the next section. Consider removing the notations}.
+Our framework is shown in Figure~\ref{fig:flowchart}. Given an image and a query class, our algorithm detects the query class of objects by sequentially making decision of exploring one context/object class at a time, and narrow down the search area for the query based on observed responses. Our goal is to learn a policy $\pi(s)$ that can dynamically selects different sequences of ``questions''  given different query classes and images. We model the problem as an MDP and use reinforcement learning, specifically imitation learning to learn class-specific policy. 
+
+%Under certain budget constraint, our goal is to learn a policy $\pi(s)$ that can sequentially select a contextual object class to detect  to narrow down the search area of the query or make an early rejection.  \HHNote{not sure what episode means hear..}of selecting actions for the input image $X$ and target query class $c_q$ \HHNote{$X$ and $c_q$ are not used here and they will be defined in the next section. Consider removing the notations}.
 
 \begin{figure*}[htb]
 \begin{center}
@@ -19,7 +18,7 @@ make an early rejection. We model the problem as a MDP and use reinforcement lea
 
 \end{figure*}
 
-\subsection{Context Driven Object Search as Markov Decision Process (MDP)}
+\subsection{Object Detection as Markov Decision Process (MDP)}
 \label{sec:policy}
 
 Specifically, given an image $X$ and a query object class $c_q$ in classes ${1,..,C}$, we define the MDP as follows.
@@ -74,7 +73,7 @@ Since the space of possible states $S$ is continuous and intractable, we use a l
 Q^{\pi}(s,a) = \theta_\pi^T \phi(s,a) 
 \end{eqnarray}
 
-where $\phi(s,a) = \phi((X, R^t),a) = \phi(X^t,a)$ is the feature of the underlying area $X^t$ at time $t$ after observing detector responses of $a_1,...,a_t$. 
+where $\phi(s,a) = \phi((X, O^t),a) = \phi(X^t,a)$ is the feature of the underlying area $X^t$ at time $t$ after observing detector responses of $a_1,...,a_t$. 
 
 The parameters $\theta_\pi$ are learned by \textit{policy iteration}. We collect $(s,a,r,s')$ samples by running episodes starting from a random or empty state, then we search and prune in the tree of states and collect states samples  and corresponding features. To prevent overfitting, an $L_2$ regularized regression is trained for each class to predict the Q-values given current states.
 
@@ -119,3 +118,12 @@ The final context probabilistic vote map is given by
 p(c_t|c,X) = \sum_{s\in X^t} p(c_t|X_s)\sum_i W(s_{c_t}^i,s;\theta^W).T(b_{c_t}^i,b_c^i)\nonumber\\
 \end{eqnarray}
 where $p(c_t|X_s)$ is the probabilities of $s$ as class $c_t$ after taking the action $a_t$ to run classification at time $t$.
+
+
+\section{Implementation Details}
+\subsection{Object Proposals}
+We use MCG object proposals in~\cite{arbelaez2014multiscale} as object candidates. Since the object proposals mainly covers the objects,  we also generate a small amount (20$\sim$30 per image) of segments using stable segmentation algorithm in~\cite{chen2011piecing} to cover the whole scene including contextual classes. To reduce the run-time retrieval overhead, our context voting step uses only the stable segments. The stable segmentation gives a coarse level of object/context division and can reduce the computation complexity of context voting compared to the large number of finer object proposals, while still maintains a semantically reasonable context inference. 
+
+\subsection{Datasets}
+We conduct our training and experiments on the Pascal VOC dataset.~\cite{Everingham10} which is a \textit{de facto} benchmark for object detection for years. Since the original dataset does not provide annotation of segmentation and contextual classes, we train our policy using the Pascal Context dataset~\cite{mottaghi2014role} which fully annotates the every pixels of the Pascal VOC 2010 train and validation sets, with additional contextual classes, which is perfectly good for our task. We use the 33 context classes and train our policy on the Pascal Context training set, and test our algorithm and baselines on the validation set. We also test our policy on the MSRC dataset~\cite{shotton2006textonboost} to show our algorithm can generalize to different data. 
+
