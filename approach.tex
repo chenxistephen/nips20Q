@@ -16,15 +16,29 @@ the optimal $Q$-value is recursively defined as $Q^\ast(s_t, a_t) = R(s_t, a_t) 
 Given an image $X$ and a query object class $c_q$ ($q \in {1,..,C}$),
 we detect the query class of objects by sequentially making decision of exploring one context/object class, and narrow down the search area for the query based on observed responses. Our framework is shown in Figure~\ref{fig:flowchart}.
 We model our problem as an MDP.
-Our \textbf{state} $s_t$ is $(X, O^t)$, where  $O^t= \{o_1, o_2, ....,o_t\}$ is a sequence of observations.
-The \textbf{action} set is $\{d_1, ..., d_C, \mbox{Stop}, \mbox{Reject}\}$, where $d_i$ is to run the detector of class $c_i$, ``Reject'' is to reject the query class and terminate the process\HHNote{Instead of ``terminate'', maybe say ``output not found'', I'm not sure what's the correct way to say not found in this context.}, and ``Stop'' is to run the detector of the query class on the refined search area and output the result.
-The \textbf{state transition} is deterministic in our case.
+
+\begin{mydef}
+The \textbf{Object Detection MDP} is defined by the tuple $(\mathcal{S}, \mathcal{A}, T(.), R(.), \gamma)$:
+\begin{itemize}
+\item \textbf{State} $s_t$ is $(X^t, O^t)$, where  $X^t$ is the search area for the query at time $t$, and initially the image $X^0 = X$. $O^t= \{o_1, o_2, ....,o_t\}$ is a sequence of observations of responses from running contextual classifiers
+\item The \textbf{actions} set $\mathcal{A} = \{a_1, ..., a_C, \mbox{Stop}, \mbox{Reject}\} $, where $a_i$ is to run the detector of class $c_i$, \textit{Reject} to reject query class in the image and terminate the process, and \textit{Stop} to output the search area and run query detector.
+\item \textbf{State transition} function $T(s'|s,a, X)$ is deterministic in our case.
+\item The \textbf{reward} function $R(s,a,s') \rightarrow \mathbb{R}$ gives reward to taking action $a$ at state $s$ to the next state $s'$
+\item The \textbf{discount} constant $\gamma$ defines a tradeoff between taking the action by greedily maximizing the immediate reward or the considering the long term expected reward.
+\item The \textbf{policy} $\pi(s): \mathcal{S} \rightarrow \mathcal{A}$ is a mapping from a state to an action.
+\end{itemize}
+\end{mydef}
+
+% Our \textbf{state} $s_t$ is $(X, O^t)$, where  $O^t= \{o_1, o_2, ....,o_t\}$ is a sequence of observations.
+% The \textbf{action} set is $\{d_1, ..., d_C, \mbox{Stop}, \mbox{Reject}\}$, where $d_i$ is to run the detector of class $c_i$, ``Reject'' is to reject the query class and terminate the process\HHNote{Instead of ``terminate'', maybe say ``output not found'', I'm not sure what's the correct way to say not found in this context.}, and ``Stop'' is to run the detector of the query class on the refined search area and output the result.
+% The \textbf{state transition} is deterministic in our case.
+
 We define the \textit{reward} $R$ as the immediate gain in intersection/union of the search space:
 \begin{eqnarray}
 \label{eq:imreward}
 R(s_t,a_t) =  \frac{X^{t+1} \cap X_q}{X^{t+1} \cup X_q} - \frac{X^{t}\cap X_q}{X^{t} \cup X_q}
 \end{eqnarray}
-where $X^{t+1}_i$ is the updated search area after executing action $a_t$ in state $s_t$, determined by the context models described in Section~\ref{sec:context}. $X_q$ is the groundtruth mask of the query object instances in the image. 
+where $X^{t+1}$ is the updated search area after executing action $a_t$ in state $s_t$, determined by the context models described in Section~\ref{sec:context}. $X_q$ is the groundtruth mask of the query object instances in the image. 
 
 \section{Approach}
 \subsection{Learning the Policy by Imitation}
@@ -39,7 +53,7 @@ a linear approximation:
 \label{eq:qvalue}
 Q^{\ast}(s,a) = \theta_\pi^T \phi(s,a),
 \end{eqnarray}
-where $\phi(s,a) = \phi((X, O^t),a) = \phi(X^t,a)$ is the feature of the underlying area $X^t$ at time $t$ after observing detector responses of $a_1,...,a_t$. 
+where $\phi(s,a) = \phi((X^t, O^t),a)$ is the feature representing the search area $X^t$ and observations $O^t$ after observing detector responses of $a_1,...,a_t$. 
 This can be solved by standard supervised learning approaches.
 
 The oracle's action sequence maximized the cumulative reward. Since the space of action sequences is exponential, we compute the oracle by breadth-first search with pruning. To avoid collecting examples from the oracle's trajectory only, we encourage exploration by starting from a random state.
@@ -57,24 +71,23 @@ We collect examples $(s,a,r)$ samples from the oracle's trajectory and use ridge
 \caption{Framework of our context driven object searching. We first generate region hypotheses using object proposal algorithms, then the policy evaluates the current state and iteratively selects the action maximizing the Q-value function. Afterwards, the possible search locations are updated and the posterior probabilities of each category are evaluated for the next state.}
 \label{fig:flowchart}
 \end{center}
-
 \end{figure*}
 
 %\subsection{Object Detection as Markov Decision Process (MDP)}
 %\label{sec:policy}
 %
-%Specifically, given an image $X$ and a query object class $c_q$ in classes ${1,..,C}$, we define the MDP as follows.
-%\begin{mydef}
+% Specifically, given an image $X$ and a query object class $c_q$ in classes ${1,..,C}$, we define the MDP as follows.
+% \begin{mydef}
 % The \textbf{detection action selection MDP} is defined by the tuple $(\mathcal{S}, \mathcal{A}, T(.), R(.), \gamma)$:
-%\begin{itemize}
-%\item \textbf{State} $s(t) = (X, O^t)\in \mathcal{S}$ that includes the image $X$ and the observations $O^t= \{x_1, x_2, ....,x_t\}$ over time till $t$. %  \HHNote{I would give some explanation of what state is before the math, e.g. a state contains necessary information for decision making}
-%\item The set of \textbf{actions} to be taken in each state $\mathcal{A} = \{a_1, ..., a_C, \mbox{Stop}, \mbox{Reject}\} $, where $a_i$ is to run the detector of class $c_i$, \textit{Reject} to reject query class in the image and terminate the process, and \textit{Stop} to output the search area and run query detector.
-%\item \textbf{State transition} function $T(s'|s,a, X)$ is the probability taking the agent to the next state $s'$ from $s$ by action $a$, depending on the instance $X$
-%\item The \textbf{reward} function $R(s,a,s') \rightarrow \mathbb{R}$ gives reward to taking action $a$ at state $s$ to the next state $s'$
-%\item The \textbf{discount} constant $\gamma$ defines a tradeoff between taking the action by greedily maximizing the immediate reward or the considering the long term expected reward.
-%\item The \textbf{policy} $\pi(s): \mathcal{S} \rightarrow \mathcal{A}$ is a mapping from a state to an action.
-%\end{itemize}
-%\end{mydef}
+% \begin{itemize}
+% \item \textbf{State} $s(t) = (X, O^t)\in \mathcal{S}$ that includes the image $X$ and the observations $O^t= \{x_1, x_2, ....,x_t\}$ over time till $t$. %  \HHNote{I would give some explanation of what state is before the math, e.g. a state contains necessary information for decision making}
+% \item The set of \textbf{actions} to be taken in each state $\mathcal{A} = \{a_1, ..., a_C, \mbox{Stop}, \mbox{Reject}\} $, where $a_i$ is to run the detector of class $c_i$, \textit{Reject} to reject query class in the image and terminate the process, and \textit{Stop} to output the search area and run query detector.
+% \item \textbf{State transition} function $T(s'|s,a, X)$ is the probability taking the agent to the next state $s'$ from $s$ by action $a$, depending on the instance $X$
+% \item The \textbf{reward} function $R(s,a,s') \rightarrow \mathbb{R}$ gives reward to taking action $a$ at state $s$ to the next state $s'$
+% \item The \textbf{discount} constant $\gamma$ defines a tradeoff between taking the action by greedily maximizing the immediate reward or the considering the long term expected reward.
+% \item The \textbf{policy} $\pi(s): \mathcal{S} \rightarrow \mathcal{A}$ is a mapping from a state to an action.
+% \end{itemize}
+% \end{mydef}
 %
 %During test time, our search policy  iteratively selects an action $a^t \in \mathcal{A}$. Then the policy obtains response $x_t$ at time step $t$ given by the detection or classification results of action $a_t$. 
 %
@@ -105,7 +118,7 @@ p(c_t|c,X) = \sum_{X_c \subset X} p(c|c_t,X_c)p(c_t|X_c)
 Given a refined search space $X_c\in X$ of a context class $c_t$ at time $t$, we formalize $p(c|c_t,X)$ as a weighted vote from the cooccurring region pairs of class $c_t$ and $c$ in training scenes. Let $(s_{c_t}^i, s_c^i)$ be the $i$-th pair of co-occurring regions of class $c_t$ and $c$, and $b_{c_t}^i$ and $b_c^i$ be the corresponding bounding boxes. We can now define the probabilistic vote map $p(c|c_t,X)$ as:
 \begin{eqnarray}
 \label{eq:votemap}
-p(c|c_t,X_c)_{s\in X^t} = \frac{1}{Z_c}\sum_i W(s_{c_t}^i,s;\theta^W).T(b_{c_t}^i,b_c^i)
+p(c|c_t,X_c) = \frac{1}{Z_c}\sum_i W(s_{c_t}^i,s;\theta^W).T(b_{c_t}^i,b_c^i)
 \end{eqnarray}
 where $s\in X^t$ is a region within the search space of the context class $c_t$. $Z_c$ is the normalization function. $W(.)$ is a kernel measuring similarity of region $s$ with a training region $s_i$. $T(b_{c_t}^i,b_c^i)$ models the transformation from $b_{c_t}^i$ to $b_c^i$, including translation and scaling. Figure~\ref{fig:votemap} shows a few examples of the vote maps. We can see that with the exemplar based and semantically aware voting, the resulted vote maps give more accurate search area of the query objects.
 
@@ -146,4 +159,4 @@ We then update the search area for the query class $c_q$ in a probabilistic fram
 \begin{eqnarray}
 p(c_q|X,O^t) = \frac{p(O^t|c_q,X)p(c_q|X)}{Z}
 \end{eqnarray}
-where $Z = \sum_c^{C^t} p(O^t|c,X)p(c|X)$ is the normalization function， $p(c|X)$ is obtained by taking actions and running context classifiers over the context segments,  and $C^t = \{c_1, c_2, ..., c_t, c_q\}$ are the set of observed contextual classes.
+where $Z = \sum_c^{C^t} p(O^t|c,X)p(c|X)$ is the partition function, $p(c|X)$ is obtained by taking actions and running context classifiers over the context segments,  and $C^t = \{c_1, c_2, ..., c_t, c_q\}$ are the set of observed contextual classes.

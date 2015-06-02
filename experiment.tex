@@ -5,6 +5,9 @@ We use MCG object proposals in~\cite{arbelaez2014multiscale} as object candidate
 \subsection{Datasets}
 We conduct our training and experiments on the Pascal VOC dataset.~\cite{Everingham10} which is a \textit{de facto} benchmark for object detection for years. Since the original dataset does not provide annotation of segmentation and contextual classes, we train our policy using the Pascal Context dataset~\cite{mottaghi2014role} which fully annotates the every pixel of the Pascal VOC 2010 train and validation sets, with additional contextual classes, which is perfectly good for our task. We use the 33 context classes and train our policy on the Pascal Context training set, and test our algorithm and baselines on the validation set. We also test our policy on the MSRC dataset~\cite{shotton2006textonboost} to show our algorithm can generalize to different data. 
 
+\subsection{Feature Representation}
+To classify the object proposals, we extract region features and classify them for object classes using the deep neural network model in~\cite{BharathECCV2014} fine-tuned on Pascal VOC 2012. For the policy action classifiers, we also use the same model to extract features for states, which concatenate the SDS features of the search areas for the query and observed context. For context classifiers we use a subset of the appearance features for superpixels from~\cite{tighe2010superparsing} and learn one-vs-all SVM models for classification.
+
 \section{Experiments}
 
 \subsection{Reduction of Number of Object Proposals}
