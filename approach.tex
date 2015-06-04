@@ -1,37 +1,31 @@
 \section{Problem Formulation}
-A sequential decision-making problem can be formulated as a Markov Decision
+Given an image $X$ and a query object of class $c_q$ ($q \in {1,..,C}$), we detect
+the query object by sequentially choosing one
+context class to detect, and narrow down the search area for the query object based on
+observed detector responses. 
+The sequential decision-making problem can be formulated as a Markov Decision
 Process (MDP).
-An MDP is defined by a tuple $(\mathcal{S}, \mathcal{A}, T(.), R(.))$,
-where $S$ is a set of \textit{states} and $A$ is a set of
-\textit{actions}. An agent interacts with the
-environment by following a
-\textit{policy} $\pi: S \rightarrow A$ that determines which action to take in a
-given state. After taking action $a$ in
-state $s$, the environment takes the
-agent to the next state $s'$ according to the transition probability $T(s'|s,a)$
-and responds with some reward $R(s,a)$.
-Given an optimal policy $\pi^\ast$ which yields a state-action sequence that maximizes the discounted cumulative reward,
-the optimal $Q$-value is recursively defined as $Q^\ast(s_t, a_t) = R(s_t, a_t) + \gamma\max_{a_{t+1}}Q^\ast(s_{t+1}, a_{t+1})$, where $a_t$ is chosen by $\pi^\ast$ and $\gamma$ is the discount factor.
-
-Given an image $X$ and a query object class $c_q$ ($q \in {1,..,C}$),
-we detect the query class of objects by sequentially making decision of exploring one context/object class, and narrow down the search area for the query based on observed responses. Our framework is shown in Figure~\ref{fig:flowchart}.
-We model our problem as an MDP.
-
 \begin{mydef}
 The \textbf{Object Detection MDP} is defined by the tuple $(\mathcal{S}, \mathcal{A}, T(.), R(.), \gamma)$:
 \begin{itemize}
-\item \textbf{State} $s_t$ is $(X^t, O^t)$, where  $X^t$ is the search area for the query at time $t$, and initially the entire image $X^0 = X$. $O^t= \{o_1, o_2, ....,o_t\}$ is a sequence of observations of responses from applying contextual classifiers
-\item The \textbf{actions} set $\mathcal{A} = \{a_1, ..., a_C, \mbox{Stop}, \mbox{Reject}\} $, where $a_i$ corresponds to running the detector of class $c_i$, \textit{Reject} means to reject the query class as occurring in the image and terminate the process, and \textit{Stop} outputs the search area and run detector corresponding to the query.
-\item \textbf{State transition} function $T(s'|s,a, X)$ is deterministic in our case.
-\item The \textbf{reward} function $R(s,a,s') \rightarrow \mathbb{R}$ gives the reward for taking action $a$ in state $s$ leading to the next state $s'$
-\item The \textbf{discount} constant $\gamma$ captures a tradeoff between taking the action that greedily maximizing the immediate reward or the considering long term expected reward.
-\item The \textbf{policy} $\pi(s): \mathcal{S} \rightarrow \mathcal{A}$ is a mapping from a state to an action.
+\item The \textbf{state} $s_t=(X^t, O^t)$, where $X^t$ is the search area for the
+query at time $t$ (initially $X^0$ is the entire image $X$), $O^t= \{o_1, o_2,
+\dots, o_t\}$ is a sequence of observed responses from applied contextual
+classifiers;
+\item The \textbf{action} set $\mathcal{A} = \{a_1, \dots, a_C, Stop,
+Reject\}$, where $a_i$ corresponds to running the detector of class
+$c_i$, \textit{Reject} means to reject the query class as occurring in the
+image and terminate the process, and \textit{Stop} outputs the search area
+and run the detector of the query class;
+\item The \textbf{state transition} function $T(s'|s,a)$ defines a
+next-state distribution after action $a$ is taken in state $s$, which is deterministic in our case;
+\item The \textbf{reward} function $R(s,a) \rightarrow \mathbb{R}$ evaluates
+how good it is to take action $a$ in state $s$;
+\item The \textbf{discount} factor $\gamma$ is a constant controlling
+the tradeoff between greedily maximizing the immediate
+reward and the long term expected reward.
 \end{itemize}
 \end{mydef}
-
-% Our \textbf{state} $s_t$ is $(X, O^t)$, where  $O^t= \{o_1, o_2, ....,o_t\}$ is a sequence of observations.
-% The \textbf{action} set is $\{d_1, ..., d_C, \mbox{Stop}, \mbox{Reject}\}$, where $d_i$ is to run the detector of class $c_i$, ``Reject'' is to reject the query class and terminate the process\HHNote{Instead of ``terminate'', maybe say ``output not found'', I'm not sure what's the correct way to say not found in this context.}, and ``Stop'' is to run the detector of the query class on the refined search area and output the result.
-% The \textbf{state transition} is deterministic in our case.
 
 We define the \textit{reward} $R$ as the immediate gain in an intersection/union model of the search space:
 \begin{eqnarray}
@@ -40,30 +34,57 @@ R(s_t,a_t) =  \frac{X^{t+1} \cap X_q}{X^{t+1} \cup X_q} - \frac{X^{t}\cap X_q}{X
 \end{eqnarray}
 where $X^{t+1}$ is the updated search area after executing action $a_t$ in state $s_t$, determined by the context models described in Section~\ref{sec:context}. $X_q$ is the groundtruth mask of the query object instances in the image. 
 
+The query agent follows a
+\textit{policy} $\pi: S \rightarrow A$ that determines which action to take in a
+given state. 
+Given an optimal policy $\pi^\ast$ which yields a state-action sequence that maximizes the discounted cumulative reward,
+the optimal $Q$-value is recursively defined as $Q^\ast(s_t, a_t) = R(s_t, a_t) + \gamma\max_{a_{t+1}}Q^\ast(s_{t+1}, a_{t+1})$, where $a_t$ is chosen by $\pi^\ast$ and $\gamma$ is the discount factor.
+Our goal is to learn the optimal policy for the object detection MDP.
+
+Our framework is shown in
+Figure~\ref{fig:flowchart}.
+
 \section{Approach}
+\HHNote{Add overview}
 \subsection{Learning the Policy by Imitation}
-Assuming we know the optimal $Q$-values, the optimal policy is simply
+Typically, MDPs are solved by reinforcement learning (e.g., Q-learning,
+REINFORCE). However, given our exponential search space, such trail-and-error
+approaches can take long to converge.
+We therefore take the imitation learning approach, where we assume direct supervising
+signals from the oracle are available and learn to mimic the oracle's
+behavior.
+
+Assuming we know the optimal $Q$-values, the optimal policy is
+straightforward 
 \begin{eqnarray}
 \label{eq:pi}
 \pi^\ast(s) = \arg\max_{a\in A} Q^\ast(s,a).
 \end{eqnarray}
-To learn $Q^\ast$, we assume that these values are given by an oracle \emph{at training time}; thus the problem is reduced to learning
+To learn $Q^\ast$, we assume these values are given
+by an \emph{oracle} at training time; thus the
+problem can be reduced to learning
 a linear approximation:
 \begin{eqnarray}
 \label{eq:qvalue}
 Q^{\ast}(s,a) = \theta_\pi^T \phi(s,a),
 \end{eqnarray}
-where $\phi(s,a) = \phi((X^t, O^t),a)$ is the feature representing the search area $X^t$ and observations $O^t$ after observing detector responses of $a_1,...,a_t$. 
+where $\phi(s,a) = \phi((X^t, O^t),a)$ is the state feature representing the search area $X^t$ and observations $O^t$ after observing detector responses of $a_1,...,a_t$. 
 This can be solved by standard supervised learning approaches.
 
-The oracle's action sequence maximized the cumulative reward. Since the space of action sequences is exponential, we compute the oracle by breadth-first search with pruning. To avoid collecting examples from the oracle's trajectory only, we encourage exploration by starting from a random state.
-We collect examples $(s,a,r)$ samples from the oracle's trajectory and use ridge regression to predict the Q-values.
-
-%\section{Approach}
-%
-% Given an image and a query class, our algorithm detects the query class of objects by sequentially making decision of exploring one context/object class at a time, and narrow down the search area for the query based on observed responses. Our goal is to learn a policy $\pi(s)$ that can dynamically selects different sequences of ``questions''  given different query classes and images. We model the problem as an MDP and use reinforcement learning, specifically imitation learning to learn class-specific policy. 
-
-%Under certain budget constraint, our goal is to learn a policy $\pi(s)$ that can sequentially select a contextual object class to detect  to narrow down the search area of the query or make an early rejection.  \HHNote{not sure what episode means hear..}of selecting actions for the input image $X$ and target query class $c_q$ \HHNote{$X$ and $c_q$ are not used here and they will be defined in the next section. Consider removing the notations}.
+\HHNote{Explain how the pruning is done}
+We compute the oracle's action sequence by breadth-first
+search with pruning. The action sequence that maximizes the discounted
+cumulative reward in the terminal state is selected as the oracle's action
+sequence.
+We then collect examples $\{(s_t,a_t,r_t)\}$ from the oracle's trajectory for
+policy training.
+However, collecting examples from the oracle's trajectory
+only may result in mismatch in distributions of training and test data, since
+the learned policy may go to state the oracle never visited.
+To solve the mismatch problem, we encourage exploration by search multiple
+times with random starting state.  
+After example collection, we train the policy (predict the optimal Q-values) by
+ridge regression.
 
 \begin{figure*}[htb]
 \begin{center}
@@ -72,39 +93,6 @@ We collect examples $(s,a,r)$ samples from the oracle's trajectory and use ridge
 \label{fig:flowchart}
 \end{center}
 \end{figure*}
-
-%\subsection{Object Detection as Markov Decision Process (MDP)}
-%\label{sec:policy}
-%
-% Specifically, given an image $X$ and a query object class $c_q$ in classes ${1,..,C}$, we define the MDP as follows.
-% \begin{mydef}
-% The \textbf{detection action selection MDP} is defined by the tuple $(\mathcal{S}, \mathcal{A}, T(.), R(.), \gamma)$:
-% \begin{itemize}
-% \item \textbf{State} $s(t) = (X, O^t)\in \mathcal{S}$ that includes the image $X$ and the observations $O^t= \{x_1, x_2, ....,x_t\}$ over time till $t$. %  \HHNote{I would give some explanation of what state is before the math, e.g. a state contains necessary information for decision making}
-% \item The set of \textbf{actions} to be taken in each state $\mathcal{A} = \{a_1, ..., a_C, \mbox{Stop}, \mbox{Reject}\} $, where $a_i$ is to run the detector of class $c_i$, \textit{Reject} to reject query class in the image and terminate the process, and \textit{Stop} to output the search area and run query detector.
-% \item \textbf{State transition} function $T(s'|s,a, X)$ is the probability taking the agent to the next state $s'$ from $s$ by action $a$, depending on the instance $X$
-% \item The \textbf{reward} function $R(s,a,s') \rightarrow \mathbb{R}$ gives reward to taking action $a$ at state $s$ to the next state $s'$
-% \item The \textbf{discount} constant $\gamma$ defines a tradeoff between taking the action by greedily maximizing the immediate reward or the considering the long term expected reward.
-% \item The \textbf{policy} $\pi(s): \mathcal{S} \rightarrow \mathcal{A}$ is a mapping from a state to an action.
-% \end{itemize}
-% \end{mydef}
-%
-%During test time, our search policy  iteratively selects an action $a^t \in \mathcal{A}$. Then the policy obtains response $x_t$ at time step $t$ given by the detection or classification results of action $a_t$. 
-%
-%\HHNote{The causal relation ``since ... we want ... then define a policy'' here doesn't seem to be right. Policy and Q-value are defined by the MDP.} 
-%Formally, since we would like to select the actions dynamically, we want to learn a value function taking action $a$ in state $s$ under the policy $\pi$, denoted $Q^\pi(s,a): S\times A \rightarrow \mathbb{R}$, where $S$ is the space of all possible states, to assign a value to a potential action $a\in A$ given the current state. We can then define policy $\pi$ to take the action that maximizes the expected value:
-%
-%\begin{eqnarray}
-%\label{eq:pi}
-%\pi(s) = \arg\max_{a_i\in A\backslash R} Q(s,a_i)
-%\end{eqnarray}
-%
-%\subsection{Reward Function}
-
-%at each time step $t$, we select a question $q_t$ and take action $a_t$ to evaluate it. Let $R^t = \{r_1, r_2, ....,r_t\}$ be the observations of responses to the actions taken at time $1...t$, where the response $r_t = p(c_t|X)$ is the detection or classification probability of class $c_t$ corresponding to question $q_t$. 
-
-
-%The parameters $\theta_\pi$ are learned by \textit{policy iteration}. We collect $(s,a,r,s')$ samples by running episodes starting from a random or empty state, then we search and prune in the tree of states and collect states samples  and corresponding features. To prevent overfitting, an $L_2$ regularized regression is trained for each class to predict the Q-values given current states.
 
 \subsection{Context Modeling}
 \label{sec:context}
