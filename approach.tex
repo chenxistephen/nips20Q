@@ -20,11 +20,11 @@ We model our problem as an MDP.
 \begin{mydef}
 The \textbf{Object Detection MDP} is defined by the tuple $(\mathcal{S}, \mathcal{A}, T(.), R(.), \gamma)$:
 \begin{itemize}
-\item \textbf{State} $s_t$ is $(X^t, O^t)$, where  $X^t$ is the search area for the query at time $t$, and initially the image $X^0 = X$. $O^t= \{o_1, o_2, ....,o_t\}$ is a sequence of observations of responses from running contextual classifiers
-\item The \textbf{actions} set $\mathcal{A} = \{a_1, ..., a_C, \mbox{Stop}, \mbox{Reject}\} $, where $a_i$ is to run the detector of class $c_i$, \textit{Reject} to reject query class in the image and terminate the process, and \textit{Stop} to output the search area and run query detector.
+\item \textbf{State} $s_t$ is $(X^t, O^t)$, where  $X^t$ is the search area for the query at time $t$, and initially the entire image $X^0 = X$. $O^t= \{o_1, o_2, ....,o_t\}$ is a sequence of observations of responses from applying contextual classifiers
+\item The \textbf{actions} set $\mathcal{A} = \{a_1, ..., a_C, \mbox{Stop}, \mbox{Reject}\} $, where $a_i$ corresponds to running the detector of class $c_i$, \textit{Reject} means to reject the query class as occurring in the image and terminate the process, and \textit{Stop} outputs the search area and run detector corresponding to the query.
 \item \textbf{State transition} function $T(s'|s,a, X)$ is deterministic in our case.
-\item The \textbf{reward} function $R(s,a,s') \rightarrow \mathbb{R}$ gives reward to taking action $a$ at state $s$ to the next state $s'$
-\item The \textbf{discount} constant $\gamma$ defines a tradeoff between taking the action by greedily maximizing the immediate reward or the considering the long term expected reward.
+\item The \textbf{reward} function $R(s,a,s') \rightarrow \mathbb{R}$ gives the reward for taking action $a$ in state $s$ leading to the next state $s'$
+\item The \textbf{discount} constant $\gamma$ captures a tradeoff between taking the action that greedily maximizing the immediate reward or the considering long term expected reward.
 \item The \textbf{policy} $\pi(s): \mathcal{S} \rightarrow \mathcal{A}$ is a mapping from a state to an action.
 \end{itemize}
 \end{mydef}
@@ -33,7 +33,7 @@ The \textbf{Object Detection MDP} is defined by the tuple $(\mathcal{S}, \mathca
 % The \textbf{action} set is $\{d_1, ..., d_C, \mbox{Stop}, \mbox{Reject}\}$, where $d_i$ is to run the detector of class $c_i$, ``Reject'' is to reject the query class and terminate the process\HHNote{Instead of ``terminate'', maybe say ``output not found'', I'm not sure what's the correct way to say not found in this context.}, and ``Stop'' is to run the detector of the query class on the refined search area and output the result.
 % The \textbf{state transition} is deterministic in our case.
 
-We define the \textit{reward} $R$ as the immediate gain in intersection/union of the search space:
+We define the \textit{reward} $R$ as the immediate gain in an intersection/union model of the search space:
 \begin{eqnarray}
 \label{eq:imreward}
 R(s_t,a_t) =  \frac{X^{t+1} \cap X_q}{X^{t+1} \cup X_q} - \frac{X^{t}\cap X_q}{X^{t} \cup X_q}
@@ -42,7 +42,7 @@ where $X^{t+1}$ is the updated search area after executing action $a_t$ in state
 
 \section{Approach}
 \subsection{Learning the Policy by Imitation}
-Suppose we know the optimal $Q$-values, the optimal policy is simply
+Assuming we know the optimal $Q$-values, the optimal policy is simply
 \begin{eqnarray}
 \label{eq:pi}
 \pi^\ast(s) = \arg\max_{a\in A} Q^\ast(s,a).
@@ -115,12 +115,12 @@ Given an action $a_t$ to detect context class $c_t$ at time $t$, $X_c \subset X$
 p(c_t|c,X) = \sum_{X_c \subset X} p(c|c_t,X_c)p(c_t|X_c)
 \end{eqnarray}
 
-Given a refined search space $X_c\in X$ of a context class $c_t$ at time $t$, we formalize $p(c|c_t,X)$ as a weighted vote from the cooccurring region pairs of class $c_t$ and $c$ in training scenes. Let $(s_{c_t}^i, s_c^i)$ be the $i$-th pair of co-occurring regions of class $c_t$ and $c$, and $b_{c_t}^i$ and $b_c^i$ be the corresponding bounding boxes. We can now define the probabilistic vote map $p(c|c_t,X)$ as:
+Given a refined search space $X_c\in X$ of a context class $c_t$ at time $t$, we formalize $p(c|c_t,X)$ as a weighted vote from the cooccurring region pairs of class $c_t$ and $c$ in training scenes. Let $(s_{c_t}^i, s_c^i)$ be the $i$-th pair of co-occurring regions of class $c_t$ and $c$, and $b_{c_t}^i$ and $b_c^i$ be their corresponding bounding boxes. We can now define the probabilistic vote map $p(c|c_t,X)$ as:
 \begin{eqnarray}
 \label{eq:votemap}
 p(c|c_t,X_c) = \frac{1}{Z_c}\sum_i W(s_{c_t}^i,s;\theta^W).T(b_{c_t}^i,b_c^i)
 \end{eqnarray}
-where $s\in X^t$ is a region within the search space of the context class $c_t$. $Z_c$ is the normalization function. $W(.)$ is a kernel measuring similarity of region $s$ with a training region $s_i$. $T(b_{c_t}^i,b_c^i)$ models the transformation from $b_{c_t}^i$ to $b_c^i$, including translation and scaling. Figure~\ref{fig:votemap} shows a few examples of the vote maps. We can see that with the exemplar based and semantically aware voting, the resulted vote maps give more accurate search area of the query objects.
+where $s\in X^t$ is a region within the search space of the context class $c_t$. $Z_c$ is the normalization function. $W(.)$ is a kernel measuring similarity of region $s$ with a training region $s_i$. $T(b_{c_t}^i,b_c^i)$ models the transformation from $b_{c_t}^i$ to $b_c^i$, including translation and scaling. Figure~\ref{fig:votemap} shows a few examples of the vote maps. We can see that with the exemplar based and semantically aware voting, the resulting vote maps give more accurate search areas for the query objects.
 
 
 \begin{figure}[ht!]
