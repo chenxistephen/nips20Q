@@ -65,8 +65,11 @@ College Park, MD 20742 \\
 \maketitle
 
 \begin{abstract}
-We propose a new strategy for simultaneous object detection and segmentation. Instead of evaluating classifiers for all possible locations of objects in the
-image, we develop a divide-and-conquer approach by sequentially posing questions about the query and related context, like playing a ``Twenty Questions'' game, to decide where to search for the object. We formulate the problem as a Markov Decision Process (MDP) and learn a policy using imitation learning that can dynamically select questions based on the query, the scene and current observed responses given by object detectors and classifiers. The algorithm reduces over 30\% of the object proposals evaluation while maintaining high average precision comparable to exhaustive search. Experiments show promising results compared with baselines of exhaustive search, searching for objects in random sequences and random locations.
+We propose a new strategy for simultaneous object detection and segmentation. Instead of evaluating all object detectors at all possible locations in the
+image, we develop a divide-and-conquer approach by sequentially posing questions about the query and its related context---like playing a ``Twenty Questions'' game---to decide where to search for the object. We formulate the problem as a Markov Decision Process and learn a search policy by imitation learning. At each step, the policy dynamically selects a question based on the query, the scene and observed responses given by object detectors evaluated so far.
+Experimental results show that our
+algorithm reduces over 30\% of the object proposal evaluation with little loss in average precision compared to exhaustive search. 
+Our learned policy also achieves better speed-accuracy tradeoff than the random search strategy.
 \end{abstract}
 
 %%%%%%%%% BODY TEXT
