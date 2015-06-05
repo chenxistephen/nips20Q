@@ -45,10 +45,10 @@ Our framework is shown in
 Figure~\ref{fig:flowchart}.
 
 \section{Approach}
-\HHNote{Add overview}
+We show our framework in Figure~\ref{fig:flowchart}.  Specifically, like playing a Twenty Questions game, at each step the policy evaluates the current state to decide an action that either reject the occurrence of the query, pose a question about a context class, or stop and run the query detector. If it poses a question about a context class, it will take the action to run context classifiers/detectors and observe responses, then update the states by refining the search area for the query object using spatially-aware contextual models. Finally, the query object detector will be evaluated in the predicted search area if the policy thinks enough contextual information has been gathered and decides to stop. In this section, we will first present the imitation learning of the 20 questions policy, then introduce how our approach predicts the search area for the query given observations of context classes from responses of previous asked questions.
 \subsection{Learning the Policy by Imitation}
-Typically, MDPs are solved by reinforcement learning (e.g., Q-learning,
-REINFORCE). However, given our exponential search space, such trail-and-error
+Typically, MDPs are solved by reinforcement learning (e.g., Q-learning~\cite{watkins1992q},
+REINFORCE~\cite{williams1992simple}). However, given our exponential search space, such trial-and-error
 approaches can take long to converge.
 We therefore take the imitation learning approach, where we assume direct supervising
 signals from the oracle are available and learn to mimic the oracle's
@@ -71,7 +71,6 @@ Q^{\ast}(s,a) = \theta_\pi^T \phi(s,a),
 where $\phi(s,a) = \phi((X^t, O^t),a)$ is the state feature representing the search area $X^t$ and observations $O^t$ after observing detector responses of $a_1,...,a_t$. 
 This can be solved by standard supervised learning approaches.
 
-\HHNote{Explain how the pruning is done}
 We compute the oracle's action sequence by breadth-first
 search with pruning. The action sequence that maximizes the discounted
 cumulative reward in the terminal state is selected as the oracle's action
@@ -82,8 +81,7 @@ However, collecting examples from the oracle's trajectory
 only may result in mismatch in distributions of training and test data, since
 the learned policy may go to state the oracle never visited.
 To solve the mismatch problem, we encourage exploration by search multiple
-times with random starting state.  
-After example collection, we train the policy (predict the optimal Q-values) by
+times with random starting state.  Due to the large number of negative states for rejection, we sample the negative states by early pruning at negative immediate reward which imitates the early rejection action. After example collection, we train the policy (predict the optimal Q-values) by
 ridge regression.
 
 \begin{figure*}[htb]

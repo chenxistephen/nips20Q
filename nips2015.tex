@@ -8,7 +8,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{multirow}
-
+\usepackage{rotating}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{amsthm}
@@ -68,7 +68,7 @@ College Park, MD 20742 \\
 We propose a new strategy for simultaneous object detection and segmentation. Instead of evaluating all object detectors at all possible locations in the
 image, we develop a divide-and-conquer approach by sequentially posing questions about the query and its related context---like playing a ``Twenty Questions'' game---to decide where to search for the object. We formulate the problem as a Markov Decision Process and learn a search policy by imitation learning. At each step, the policy dynamically selects a question based on the query, the scene and observed responses given by object detectors evaluated so far.
 Experimental results show that our
-algorithm reduces over 30\% of the object proposal evaluation with little loss in average precision compared to exhaustive search. 
+algorithm reduces over 30\% of the object proposal evaluation while improving performance in average precision compared to exhaustive search. 
 Our learned policy also achieves better speed-accuracy tradeoff than the random search strategy.
 \end{abstract}
 
