@@ -10,9 +10,18 @@ To classify object proposals, we extract region features and classify them using
 
 \section{Experiments}
 
-We conduct our experiments on the Pascal VOC 2010 dataset, in consistence with the data to train our context model. We evaluate the object detection performance by mean average precision (mAP). Since we also evaluate the performance of simultaneous detection and segmentation, we use the validation set as our test set which provides object segmentation annotations. 
+% We conduct our experiments on the Pascal VOC 2010 dataset, in consistence with the data to train our context model. We evaluate the object detection performance by mean average precision (mAP). Since we also evaluate the performance of simultaneous detection and segmentation, we use the validation set as our test set which provides object segmentation annotations. 
 
 %\subsection{Reduction of Number of Object Proposals}
+
+%
+
+\subsection{Performance of Object Detection} We compare our model with current state-of-the-art exhaustive search baselines SDS~\cite{BharathECCV2014} and RCNN~\cite{girshick14CVPR}, as well as a recent proposed contextual model in~\cite{mottaghi2014role}, which considers global and local context in a Markov Random Field framework based on deformable part-based model. This model has high computational cost since it needs to evaluate hundreds of thousands of windows as well as the context deformation term between all context boxes in the graph. Table~\ref{Tablepascal} shows the classwise mAP of our 20 questions-based object detection with other context based methods and their corresponding baselines.  Our 20 question detection approach has outperformed the SDS and RCNN exhaustive search baselines as well as DPM based context approaches. Both the SDS and the 20 question method starts with 2000 object proposals per image; after the 20 questions refinement of the search space the average number of detector evaluations (including the overhead of context classifiers evaluated) has decreased 36\%. We can see that although the performance for some classes have dropped due to possible rejection of true object candidates, more classes that are usually more correlated  to other objects in the scenes have significant gain over exhaustive search, such as boat, car, chair, cow, sofa etc., thus improving the overall average precision. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Reduction of Object Proposals} 
+Figure~\ref{fig:mapVSnumprop} shows the average precision performance on the Pascal VOC 2010 dataset with respect to the number of object proposals/windows used. We compared our 20 question approach to the baseline of running detectors in~\cite{BharathECCV2014} exhaustively over all object proposals,  random search which randomly samples the same number of object proposals for detection,  window selection driven by context in~\cite{bogdan2012context}, detection using object proposals in selective search~\cite{van2011segmentation} and objectness~\cite{alexe2010object}. We can see that that our 20 questions detection algorithm can effectively reduce a large amount of object proposals ($30\% \sim 40\%$) with comparable performance to exhaustive detection on all object proposals. With the number of object proposals increasing, our algorithm can even achieve better results than exhaustive methods due to the reduction of false positives. We can also see the random search approach performs poorly, showing the effectiveness of our context driven search approach.
+
 
 \begin{figure}[htb!]
 \begin{center}
@@ -21,15 +30,7 @@ We conduct our experiments on the Pascal VOC 2010 dataset, in consistence with t
 \caption{Performance on Pascal VOC dataset. Best viewed in color. }
 \label{fig:mapVSnumprop}
 \end{figure}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Reduction of Object Proposals} 
-Figure~\ref{fig:mapVSnumprop} shows the average precision performance on the Pascal VOC 2010 dataset with respect to the number of object proposals/windows used. We compared our 20 question approach to the baseline of running detectors in~\cite{BharathECCV2014} exhaustively over all object proposals,  window selection driven by context in~\cite{bogdan2012context}, detection using object proposals in selective search~\cite{van2011segmentation} and objectness~\cite{alexe2010object}. We can see that that our 20 questions detection algorithm can effectively reduce a large amount of object proposals ($30\% \sim 40\%$) with comparable performance to exhaustive detection on all object proposals. With the number of object proposals increasing, With the increase of the number of object proposals, our algorithm can even achieve results better than exhaustive methods due to the reduction of false positives. We can also see that with the same number of object proposals, our approach performs much more effectively by a large margin compared with random search approach which randomly samples the same number of object proposals for detection. 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\subsection{Performance of Object Detection} We compare our model with current state-of-the-art exhaustive search baselines SDS~\cite{BharathECCV2014} and RCNN~\cite{girshick14CVPR}, as well as  a recent proposed contextual model in~\cite{mottaghi2014role}, which considers global and local context in a Markov Random Field framework based on deformable part-based model. This model has high computational cost since it needs to evaluate hundreds of thousands of windows as well as the context deformation term between all context boxes in the graph. Table~\ref{Tablepascal} shows the classwise mAP of our 20 questions-based object detection with other context based methods and their corresponding baselines.  Our 20 question detection approach has outperformed the SDS and RCNN exhaustive search baselines as well as DPM based context approaches. Both the SDS and the 20 question method starts with 2000 object proposals per image; after the 20 questions refinement of the search space the average number of detector evaluations (including the overhead of context classifiers evaluated) has decreased 36\%. We can see that although the performance for some classes have dropped due to possible rejection of true object candidates, more classes that are usually more correlated  to other objects in the scenes have significant gain over exhaustive search, such as boat, car, chair, cow, sofa etc., thus improving the overall average precision. 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{table*}\tiny
 \caption{Avg. Precision for detection of our algorithm against previous contextual approaches on PASCAL VOC10 dataset.}
@@ -59,7 +60,7 @@ SDS+20Q          & 66.8 & {\bf64.3} & {\bf48.9} & {\bf36.1} & 32.2 & {\bf67.7} &
 \end{table*}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Improvement on the search space accuracy} To show the quality of our predicted search area, we evaluate the mean intersect vs. union (IU) of the search area produced by our 20 questions approach with the groundtruth object. We also compare with the search area of the original detector, produced by the union of the object proposals with high scores. Table~\ref{tab:space} shows that our approach has significantly improved the accuracy of overlapping between the predicted search area and the target query object.  We also find that the mean IU of the 20 questions search space has come close to that predicted by the oracle trajectory, which shows that our imitation learning has learn a good policy that closely mimic oracle's behavior.
-\begin{table}\scriptsize                               
+\begin{table}\footnotesize                               
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|}                    
 \hline                                          
