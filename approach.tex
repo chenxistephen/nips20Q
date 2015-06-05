@@ -99,9 +99,9 @@ ridge regression.
 
 \subsection{Context Modeling}
 \label{sec:context}
-Since our task is not only to detect the object but also refine the search space of the query in the image as accurately as possible, conventional modeling of context as simple co-occurrence statistics is inadequate. Instead we present a data-driven location aware approach to represent the spatial correlation between the objects and the scene. 
+Since our task is not only to detect instances of the query object but also to refine the search space of the query in the image as accurately as possible, conventional modeling of context as simple co-occurrence statistics is inadequate. Instead we present a data-driven location-aware approach to represent the spatial correlation between the objects and the scene. 
 
-Given an action $a_t$ to detect context class $c_t$ at time $t$, $X_c \subset X$ is the exploration area for context, here we formulate the context $p(c|c_t,X)$ as a posterior of the probabilistic vote map $p(c_t|c,X_c)$ defined on each pixel $(x_i,x_j)\in X$ over the image, and the responses of class $c_t$ after action $a_t$:
+Given an action $a_t$ to detect context class $c_t$ at time $t$, we define $X_c \subset X$ as the \textit{exploration area for context} which excludes the observed regions of other contextual classes from the image. Here we formulate the context $p(c|c_t,X)$ as a posterior of the probabilistic vote map $p(c_t|c,X_c)$ defined on each pixel $(x_i,x_j)\in X$ over the image, and the responses of class $c_t$ after action $a_t$:
 \begin{eqnarray}
 p(c_t|c,X) = \sum_{X_c \subset X} p(c|c_t,X_c)p(c_t|X_c)
 \end{eqnarray}
@@ -129,6 +129,15 @@ where $s\in X^t$ is a region within the search space of the context class $c_t$.
 %     \caption{Caption place holder}
 % \end{figure*}
 
+% \begin{figure}[h]
+% \centering
+%  \subfloat[Subfigure 1 list of figures text][Subfigure 1 caption]{
+% \includegraphics[width=0.4\textwidth]{figures/vote_sky_boat.pdf}
+%  }
+%  \subfloat[Subfigure 1 list of figures text][Subfigure 1 caption]{
+% \includegraphics[width=0.4\textwidth]{figures/votemap.pdf}
+%  }
+% \end{figure}
 
 \begin{figure}[ht!]
 \begin{center}
