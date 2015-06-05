@@ -129,22 +129,30 @@ where $s\in X^t$ is a region within the search space of the context class $c_t$.
 %     \caption{Caption place holder}
 % \end{figure*}
 
-
+\captionsetup[subfigure]{labelformat=empty}
 \begin{figure}[ht!]
-\begin{center}
-\includegraphics[width=0.6\linewidth]{figures/vote_sky_boat.pdf}
-\end{center}
-\caption{Examples of our weighted vote map for the context from sky to boat. The first rows are the training sample pairs of sky and boat and the second row is the test image and the resulted weighted voting map. The widths of the arrows denote the weighted similarity $W(s_{c_t}^i,s;\theta^W)$ between the test segment of sky (highlighted in yellow) and a training instance of sky segment (in light blue)}
+\centering
+\begin{subfigure}[t]{0.48\textwidth}
+\centering
+\includegraphics[height=1.2in]{figures/vote_sky_boat.pdf}
+\caption{(i) Weighted vote map from sky to boat.}
 \label{fig:vote_sky_boat}
-\end{figure}
-
-
-\begin{figure}[ht!]
-\begin{center}
-\includegraphics[width=0.6\linewidth]{figures/votemap.pdf}
-\end{center}
-\caption{Examples of our context vote maps. Each pair of images corresponds to the original image and the vote-based probability map of object location from observed context. From (a) - (d) are the vote maps from water to boat, sky to boat, road to car and grass to cow, respectively. Best viewed in color.}
+\end{subfigure}
+\begin{subfigure}[t]{0.48\textwidth}
+\centering
+\includegraphics[height=1.2in]{figures/votemap.pdf}
+\caption{(ii) Example context vote maps.}
 \label{fig:votemap}
+\end{subfigure}
+\caption{(i):The first row shows example training pairs of the sky and the boat. 
+The second row shows the test image and the weighted voting map. 
+The width of the arrow denotes the weighted
+similarity $W(s_{c_t}^i,s;\theta^W)$ between the test segment
+(highlighted in yellow) and one of the training sky segments (highlighted
+in light blue).
+(ii) Each pair shows the original image and the voted probability
+map of object locations given observed context. From (a) -- (d) are the vote maps from water to boat, sky to boat, road to car and grass to cow. Best viewed in color.
+}
 \end{figure}
 
 

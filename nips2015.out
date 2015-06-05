@@ -10,4 +10,8 @@
 \BOOKMARK [2][-]{subsection.5.2}{Datasets}{section.5}% 10
 \BOOKMARK [2][-]{subsection.5.3}{Feature Representation}{section.5}% 11
 \BOOKMARK [1][-]{section.6}{Experiments}{}% 12
-\BOOKMARK [2][-]{subsection.6.1}{Improvement on the search space accuracy}{section.6}% 13
+\BOOKMARK [2][-]{subsection.6.1}{Performance of Object Detection}{section.6}% 13
+\BOOKMARK [2][-]{subsection.6.2}{Reduction of Object Proposals}{section.6}% 14
+\BOOKMARK [2][-]{subsection.6.3}{Improvement on the search space accuracy}{section.6}% 15
+\BOOKMARK [2][-]{subsection.6.4}{Simultaneous detection and segmentation}{section.6}% 16
+\BOOKMARK [1][-]{section.7}{Conclusion}{}% 17
