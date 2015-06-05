@@ -16,24 +16,23 @@ By contrast, humans do not process the whole scene at once: it is an active proc
 %This is highly inefficient since many non-informative contextual objects have to be queried. 
 For instance, in Figure~\ref{fig:20Qintro}, when we search for cars, knowing the top of the scene is sky does not help distinguish whether there is a car or a boat since both can be under the sky; 
 on the other hand, observing a road instead of water in the lower part gives a strong indication of the existence of cars. 
-Additionally, we know from experience that roads, cars and buildings are likely to co-occur and cars are often found beside buildings. 
-Therefore to find cars, humans tend to first look for roads and then search around buildings, instead of looking up for the sky. %And if we know there is road, we do not need to ask about water.
+Therefore to find cars, humans tend to first look for roads instead of looking up for the sky; additionally, if we can not find cars running on the road,  we may want to look ``beside'' the buildings because cars are likely to park next to them. %And if we know there is road, we do not need to ask about water.
 %We note that the set of related object classes and the order of asking questions about them is dynamic given a specific query in the scene and knowledge of previous observations.
 This motivates us to raise the question: \textit{can object detection algorithms decide where to look for objects of a query class more efficiently and accurately by exploring a few related context cues dynamically, similar to humans?}
 
 We formulate the object detection problem as a Markov Decision Process (MDP). 
 We use imitation learning to learn a context-driven policy that sequentially and dynamically selects the most informative context class to explore based on past observations, and gradually refine the search area for the query class. 
 We show our framework in Figure~\ref{fig:flowchart}.  Specifically, like playing a Twenty Questions game, at each step the policy asks for information about a context class based on the query and responses from previous contextual classifiers. 
-We then run the detector/classifier of the inquired context class. Based on the responses, we further refine the search area for the query class using spatial-aware contextual models. 
+We then run the detector/classifier of the inquired context class. Based on the responses, we further refine the search area for the query class using spatially-aware contextual models. 
 This process of context querying and search area refining is repeated until the policy thinks enough contextual information has been gathered and decides to stop. 
 Finally, we run the query object detector in the refined search area and output the result. 
-Besides asking for contextual information, our policy can reject a query early to avoid unnecessary detection if it determines that there is a small chance of having the query object in the scene. 
+Besides asking for contextual information, our policy can reject a query early to avoid unnecessary detection if it determines that there is little chance of having the query object in the scene. 
 The decision of early rejection can be made even before running any object detector, therefore we can eliminate a large amount of unnecessary computation. 
 
-Object detection experimental results on images of complex scenes (the PASCAL VOC 2010 dataset) show that our algorithm produces a search area that has better overlap with the target object by leveraging its context, 
-thus significantly reduces the number of object proposals to consider and detectors to evaluate\HHNote{Add the number here}.
-Although with less computation, our method achieves mean average precision (mAP) comparable to the exhaustive search method. 
-To the best of our knowledge, this is one of the first few approaches that solve the challenging task of simultaneous object detection and segmentation in complex real scenes by applying imitation learning to learn a policy fully driven by semantic context.
+Object detection experiments on the PASCAL VOC dataset show that our algorithm produces a search area that has better overlap with the target object by leveraging its context, 
+thus significantly reduces the number of object proposals to consider and detectors to evaluate by over $30\%$.
+Although with less computation, our method achieves mean average precision (mAP) comparable to or even higher than the exhaustive search method. 
+To the best of our knowledge, this is one of the first few approaches that solve the challenging task of simultaneous object detection and segmentation in complex scenes in an MDP framework by applying imitation learning to learn a policy fully driven by context.
 
 
 \begin{figure*}[htb]
