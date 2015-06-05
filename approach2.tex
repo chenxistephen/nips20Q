@@ -99,11 +99,9 @@ ridge regression.
 
 \subsection{Context Modeling}
 \label{sec:context}
-Since our task is not only to detect instances of the query object but also to refine the search space of the query in the image as accurately as possible, conventional modeling of context as simple co-occurrence statistics is inadequate. Instead we present a data-driven location-aware approach to represent the spatial correlation between the objects and the scene. 
+Since our task is not only to detect the object but also refine the search space of the query in the image as accurately as possible, conventional modeling of context as simple co-occurrence statistics is inadequate. Instead we present a data-driven location aware approach to represent the spatial correlation between the objects and the scene. 
 
-We capture the spatial relationships in a non-parametric manner. During training, we 
-
-Given an action $a_t$ to detect context class $c_t$ at time $t$, we define $X_c \subset X$ as the \textit{exploration area for context} which excludes the observed regions of other contextual classes from the image. Here we formulate the context $p(c|c_t,X)$ as a posterior of the probabilistic vote map $p(c_t|c,X_c)$ defined on each pixel $(x_i,x_j)\in X$ over the image, and the responses of class $c_t$ after action $a_t$:
+Given an action $a_t$ to detect context class $c_t$ at time $t$, $X_c \subset X$ is the exploration area for context, here we formulate the context $p(c|c_t,X)$ as a posterior of the probabilistic vote map $p(c_t|c,X_c)$ defined on each pixel $(x_i,x_j)\in X$ over the image, and the responses of class $c_t$ after action $a_t$:
 \begin{eqnarray}
 p(c_t|c,X) = \sum_{X_c \subset X} p(c|c_t,X_c)p(c_t|X_c)
 \end{eqnarray}
@@ -114,6 +112,22 @@ Given a refined search space $X_c\in X$ of a context class $c_t$ at time $t$, we
 p(c|c_t,X_c) = \frac{1}{Z_c}\sum_i W(s_{c_t}^i,s;\theta^W).T(b_{c_t}^i,b_c^i)
 \end{eqnarray}
 where $s\in X^t$ is a region within the search space of the context class $c_t$. $Z_c$ is the normalization function. $W(.)$ is a kernel measuring similarity of region $s$ with a training region $s_i$. $T(b_{c_t}^i,b_c^i)$ models the transformation from $b_{c_t}^i$ to $b_c^i$, including translation and scaling. Figure~\ref{fig:votemap} shows a few examples of the vote maps. We can see that with the exemplar based and semantically aware voting, the resulting vote maps give more accurate search areas for the query objects.
+
+% \begin{figure*}[t!]
+%     \centering
+%     \begin{subfigure}[b]{0.5\linewidth}
+%         \centering
+%         \includegraphics[width=0.5\linewidth]{figures/vote_sky_boat.pdf}
+%         \caption{Lorem ipsum}
+%     \end{subfigure}%
+%     ~ 
+%     \begin{subfigure}[b]{0.5\linewidth}
+%         \centering
+%         \includegraphics[width=0.5\linewidth]{figures/votemap.pdf}
+%         \caption{Lorem ipsum, lorem ipsum,Lorem ipsum, lorem ipsum,Lorem ipsum}
+%     \end{subfigure}
+%     \caption{Caption place holder}
+% \end{figure*}
 
 \captionsetup[subfigure]{labelformat=empty}
 \begin{figure}[ht!]
@@ -140,25 +154,6 @@ in light blue).
 map of object locations given observed context. From (a) -- (d) are the vote maps from water to boat, sky to boat, road to car and grass to cow. Best viewed in color.
 }
 \end{figure}
-
-% \begin{figure}[ht!]
-% \begin{center}
-% \includegraphics[width=0.6\linewidth]{figures/vote_sky_boat.pdf}
-% \end{center}
-% \caption{Examples of our weighted vote map for the context from sky to boat. The first rows are the training sample pairs of sky and boat and the second row is the test image and the resulted weighted voting map. The widths of the arrows denote the weighted similarity $W(s_{c_t}^i,s;\theta^W)$ between the test segment of sky (highlighted in yellow) and a training instance of sky segment (in light blue)}
-% \label{fig:vote_sky_boat}
-% \end{figure}
-% 
-% 
-% \begin{figure}[ht!]
-% \begin{center}
-% \includegraphics[width=0.6\linewidth]{figures/votemap.pdf}
-% \end{center}
-% \caption{Examples of our context vote maps. Each pair of images corresponds to the original image and the vote-based probability map of object location from observed context. From (a) - (d) are the vote maps from water to boat, sky to boat, road to car and grass to cow, respectively. Best viewed in color.}
-% \label{fig:votemap}
-% \end{figure}
-
-
 
 The final context probabilistic vote map is given by
 \begin{eqnarray}
