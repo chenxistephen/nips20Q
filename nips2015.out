@@ -10,6 +10,4 @@
 \BOOKMARK [2][-]{subsection.5.2}{Datasets}{section.5}% 10
 \BOOKMARK [2][-]{subsection.5.3}{Feature Representation}{section.5}% 11
 \BOOKMARK [1][-]{section.6}{Experiments}{}% 12
-\BOOKMARK [2][-]{subsection.6.1}{Reduction of Number of Object Proposals}{section.6}% 13
-\BOOKMARK [2][-]{subsection.6.2}{Comparison with other context based methods}{section.6}% 14
-\BOOKMARK [2][-]{subsection.6.3}{Comparison with random search methods}{section.6}% 15
+\BOOKMARK [2][-]{subsection.6.1}{Improvement on the search space accuracy}{section.6}% 13

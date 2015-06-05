@@ -41,11 +41,15 @@ Given an optimal policy $\pi^\ast$ which yields a state-action sequence that max
 the optimal $Q$-value is recursively defined as $Q^\ast(s_t, a_t) = R(s_t, a_t) + \gamma\max_{a_{t+1}}Q^\ast(s_{t+1}, a_{t+1})$, where $a_t$ is chosen by $\pi^\ast$ and $\gamma$ is the discount factor.
 Our goal is to learn the optimal policy for the object detection MDP.
 
-Our framework is shown in
-Figure~\ref{fig:flowchart}.
-
 \section{Approach}
-We show our framework in Figure~\ref{fig:flowchart}.  Specifically, like playing a Twenty Questions game, at each step the policy evaluates the current state to decide an action that either reject the occurrence of the query, pose a question about a context class, or stop and run the query detector. If it poses a question about a context class, it will take the action to run context classifiers/detectors and observe responses, then update the states by refining the search area for the query object using spatially-aware contextual models. Finally, the query object detector will be evaluated in the predicted search area if the policy thinks enough contextual information has been gathered and decides to stop. In this section, we will first present the imitation learning of the 20 questions policy, then introduce how our approach predicts the search area for the query given observations of context classes from responses of previous asked questions.
+We show our framework in Figure~\ref{fig:flowchart}.
+Given a query, we first generate region hypotheses using object proposal algorithms, 
+then the policy sequentially selects an action that rejects the occurrence of the query, poses a question about a context class, or stop and run the query detector. 
+After an action is taken, the search locations are updated based on the responses and
+new posterior probabilities of each category are computed to update the state.
+In this section, we first present the imitation learning algorithm for learning a policy that plays the twenty questions game; 
+we then describe how to refine the search area of the query given responses of contextual classifiers evaluated by previous questions.
+
 \subsection{Learning the Policy by Imitation}
 Typically, MDPs are solved by reinforcement learning (e.g., Q-learning~\cite{watkins1992q},
 REINFORCE~\cite{williams1992simple}). However, given our exponential search space, such trial-and-error
@@ -87,7 +91,8 @@ ridge regression.
 \begin{figure*}[htb]
 \begin{center}
 \includegraphics[width=\linewidth]{figures/flowchart_Q.pdf}
-\caption{Framework of our context driven object searching. We first generate region hypotheses using object proposal algorithms, then the policy evaluates the current state and iteratively selects the action maximizing the Q-value function. Afterwards, the possible search locations are updated and the posterior probabilities of each category are evaluated for the next state.}
+\caption{Flowchart of our context driven object searching. %We first generate region hypotheses using object proposal algorithms, then the policy evaluates the current state and iteratively selects the action maximizing the Q-value function. Afterwards, the possible search locations are updated and the posterior probabilities of each category are evaluated for the next state.
+}
 \label{fig:flowchart}
 \end{center}
 \end{figure*}
