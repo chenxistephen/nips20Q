@@ -19,8 +19,8 @@
 \newcommand{\HHNote}[1]{\textbf{[hhe: {#1}]}}
 \usepackage{caption}
 \usepackage{subcaption}
-\title{The Imitation Game:\\ Object Detection in 20 Questions}
-
+\usepackage{enumitem}
+\title{Object Detection in 20 Questions}
 
 \author{
 Xi (Stephen) Chen\\
@@ -67,7 +67,7 @@ College Park, MD 20742 \\
 \begin{abstract}
 We propose a new strategy for simultaneous object detection and segmentation. Instead of evaluating all object detectors at all possible locations in the
 image, we develop a divide-and-conquer approach by sequentially posing questions about the query and its related context---like playing a ``Twenty Questions'' game---to decide where to search for the object. We formulate the problem as a Markov Decision Process and learn a search policy by imitation learning. At each step, the policy dynamically selects a question based on the query, the scene and observed responses given by object detectors evaluated so far.
-Experiments in detection and segmentation show that our algorithm reduces over 30\% of the object proposal evaluation while improving performance in average precision as well as producing more accurate search area compared to exhaustive search. Our learned policy also achieves better speed-accuracy tradeoff than the random search strategy. 
+Experiments in detection and segmentation show that our algorithm reduces over 30\% of the object proposal evaluations while improving performance in average precision as well as producing more accurate search areas compared to exhaustive search. Our learned policy also achieves better speed-accuracy tradeoff than the random search strategy. 
 \end{abstract}
 
 %%%%%%%%% BODY TEXT

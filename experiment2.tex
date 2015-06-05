@@ -3,10 +3,10 @@
 We use MCG object proposals in~\cite{arbelaez2014multiscale} as object candidates. Since the object proposals mainly covers the objects,  we also generate a small number (20$\sim$30 per image) of segments using the stable segmentation algorithm from~\cite{chen2011piecing} to cover the whole scene including contextual classes. To reduce the computational overhead, our context voting step uses only the stable segments. The stable segmentation gives a coarse level of object/context division and reduces the computational complexity of context voting compared to the large number of finer object proposals, while still maintaining a semantically informative contextual inference. 
 
 \subsection{Datasets}
-We conduct our experiments on the Pascal VOC dataset~\cite{Everingham10}, a standard benchmark for object detection. Since the original dataset does not provide annotation for segmentation of contextual classes, we train our policy using the Pascal Context dataset~\cite{mottaghi2014role} which fully annotates every pixel of the Pascal VOC 2010 train and validation sets, with additional contextual classes such as sky, grass, ground, building, etc. We use the 33 context classes from~\cite{mottaghi2014role} and train our policy on the Pascal Context training set, and test our algorithm and baselines on the validation set. We also test our policy on the MSRC dataset~\cite{shotton2006textonboost} to show our algorithm can generalize to different data. 
+We conduct our training and experiments on the Pascal VOC dataset.~\cite{Everingham10} which is a \textit{de facto} benchmark for object detection. Since the original dataset does not provide annotation of segmentation and contextual classes, we train our policy using the Pascal Context dataset~\cite{mottaghi2014role} which fully annotates every pixel of the Pascal VOC 2010 train and validation sets, with additional contextual classes such as sky, grass, ground, building etc., which is adequate for our purposes. We use the 33 context classes from~\cite{mottaghi2014role} and train our policy on the Pascal Context training set, and test our algorithm and baselines on the validation set. We also test our policy on the MSRC dataset~\cite{shotton2006textonboost} to show our algorithm can generalize to different data. 
 
 \subsection{Feature Representation}
-To classify object proposals, we extract region features and classify them using the deep neural network model in~\cite{BharathECCV2014} fine-tuned on Pascal VOC 2012. For the policy action classifiers, we use the same model to extract features for states represented by the masks of search area $X^t$ and observed area $O^t$ in state $s_t$, then concatenate the features as inputs to the policy. For context classifiers we use a subset of the appearance features for superpixels from~\cite{tighe2010superparsing} and learn one-vs-all SVM models for classification.
+To classify object proposals, we extract region features and classify them using the deep neural network model in~\cite{BharathECCV2014} fine-tuned on Pascal VOC 2012. For the policy action classifiers, we also use the same model to extract features for states represented by the masks of search area $X^t$ and observed area $O^t$ in state $s_t$, then concatenate the features as inputs to the policy. For context classifiers we use a subset of the appearance features for superpixels from~\cite{tighe2010superparsing} and learn one-vs-all SVM models for classification.
 
 \section{Experiments}
 
@@ -16,25 +16,36 @@ To classify object proposals, we extract region features and classify them using
 
 %
 
-\subsection{Performance of Object Detection} We compare our model with current state-of-the-art exhaustive search baselines SDS~\cite{BharathECCV2014} and RCNN~\cite{girshick14CVPR}, as well as a recently proposed contextual model in~\cite{mottaghi2014role}, which considers global and local context in a Markov Random Field framework based on a deformable part-based model. This model has high computational cost since it needs to evaluate hundreds of thousands of windows as well as the context deformation term between all context boxes in the graph. Table~\ref{Tablepascal} shows the classwise mAP of our 20 questions approach with other context based methods and their corresponding baselines.  Our 20 question detection approach outperforms the SDS and RCNN exhaustive search baselines as well as DPM based context approaches. Both the SDS and the 20 question method start with 2000 object proposals per image; after the 20 questions refinement of the search space, the average number of detector evaluations (including the overhead of context classifiers evaluated) has decreased 36\%. We can see that although the performance for some classes have dropped due to possible rejection of true object candidates, classes that are more correlated  to other objects in the scenes have significant gain over exhaustive search, such as boat, car, chair, cow, sofa etc., thus improving overall average precision. 
+\subsection{Performance of Object Detection} We compare our model with current state-of-the-art exhaustive search baselines SDS~\cite{BharathECCV2014} and RCNN~\cite{girshick14CVPR}, as well as a recent proposed contextual model in~\cite{mottaghi2014role}, which considers global and local context in a Markov Random Field framework based on deformable part-based model. This model has high computational cost since it needs to evaluate hundreds of thousands of windows as well as the context deformation term between all context boxes in the graph. Table~\ref{Tablepascal} shows the classwise mAP of our 20 questions-based object detection with other context based methods and their corresponding baselines.  Our 20 question detection approach has outperformed the SDS and RCNN exhaustive search baselines as well as DPM based context approaches. Both the SDS and the 20 question method starts with 2000 object proposals per image; after the 20 questions refinement of the search space the average number of detector evaluations (including the overhead of context classifiers evaluated) has decreased 36\%. We can see that although the performance for some classes have dropped due to possible rejection of true object candidates, more classes that are usually more correlated  to other objects in the scenes have significant gain over exhaustive search, such as boat, car, chair, cow, sofa etc., thus improving the overall average precision. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Reduction of Object Proposals} 
-Figure~\ref{fig:mapVSnumprop} shows the average precision performance on the Pascal VOC 2010 dataset with respect to the number of object proposals/windows used. We compared our 20 question approach to the baseline of running detectors in~\cite{BharathECCV2014} exhaustively over all object proposals,  random search which randomly samples the same number of object proposals for detection,  window selection driven by context in~\cite{bogdan2012context}, detection using object proposals in selective search~\cite{van2011segmentation} and objectness~\cite{alexe2010object}. We can see that that our 20 questions detection algorithm can effectively reduce a large amount of object proposals ($30\% \sim 40\%$) with comparable performance to exhaustive detection on all object proposals. With increasing numbers of object proposals, our algorithm can achieve even better results than exhaustive methods due to the reduction of false positives. We also see the random search approach performs poorly, showing the effectiveness of our context driven search approach.
+Figure~\ref{fig:mapVSnumprop} shows the average precision performance on the Pascal VOC 2010 dataset with respect to the number of object proposals/windows used. We compared our 20 question approach to the baseline of running detectors in~\cite{BharathECCV2014} exhaustively over all object proposals,  random search which randomly samples the same number of object proposals for detection,  window selection driven by context in~\cite{bogdan2012context}, detection using object proposals in selective search~\cite{van2011segmentation} and objectness~\cite{alexe2010object}. We can see that that our 20 questions detection algorithm can effectively reduce a large amount of object proposals ($30\% \sim 40\%$) with comparable performance to exhaustive detection on all object proposals. With the number of object proposals increasing, our algorithm can even achieve better results than exhaustive methods due to the reduction of false positives. We can also see the random search approach performs poorly, showing the effectiveness of our context driven search approach.
 
-
-% \begin{figure}[htb!]
-% \begin{minipage}[c]{.6\textwidth}
-%  \includegraphics[width=0.98\linewidth]{figures/numprop.pdf}
-% \end{minipage}%
-% \begin{minipage}[c]{.4\textwidth}
-%  \caption{Performance on Pascal VOC dataset. Best viewed in color. }\label{fig:mapVSnumprop}
-% \end{minipage}
-% \end{figure}
+\begin{figure}
+\begin{minipage}{0.5\textwidth}
+\includegraphics[width=1\linewidth]{figures/numprop.pdf}
+\caption{Performance on Pascal VOC dataset. Best viewed in color. }
+\label{fig:mapVSnumprop}
+\end{minipage}
+\hfill
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{minipage}{0.4\textwidth}
+\begin{tabular}{|c|c|c|c|c|}                    
+\hline                                          
+ & Original & 20Q  & Oracle \\          
+\hline                                          
+ Mean IU & 64.12 &  73.9 &  \textbf{78.2} \\        
+\hline                                          
+\end{tabular}     
+\captionof{table}{Mean intersect VS union (IU) of the predicted search area and the groundtruth objects. }                        
+\label{tab:space}                      
+\end{minipage}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{table*}\tiny
-\caption{Avg. detection precision of ours and other algorithms on PASCAL VOC10 dataset.}
+\caption{Avg. Precision for detection of our algorithm against previous contextual approaches on PASCAL VOC10 dataset.}
 \begin{tabular}{p{1.60cm}|p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}c}
 &{\begin{sideways}Aeroplane\end{sideways}}&{\begin{sideways}Bicycle\end{sideways}}&
 {\begin{sideways}Bird\end{sideways}}&{\begin{sideways}Boat\end{sideways}}&{\begin{sideways}Bottle\end{sideways}}&{\begin{sideways}Bus\end{sideways}}
@@ -60,46 +71,16 @@ SDS+20Q          & 66.8 & {\bf64.3} & {\bf48.9} & {\bf36.1} & 32.2 & {\bf67.7} &
 \label{Tablepascal}
 \end{table*}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Improvement on the search space accuracy} To measure the quality of our predicted search areas, we evaluate the mean intersect vs. union (IU) of the search area produced by our 20 questions approach with the groundtruth objects. We also compare with the search area of the original detector, produced by the union of the object proposals with high scores. Table~\ref{tab:space} shows that our approach significantly improves the accuracy of overlap between the predicted search area and the target query object.  We also find that the mean IU of the 20 questions search space is close to that predicted by the oracle trajectory, which shows that our imitation learning has learned a good policy that closely mimics the oracle's behavior.
-\begin{figure}
-\begin{minipage}{0.6\textwidth}
-\includegraphics[width=1\linewidth]{figures/numprop.pdf}
-\caption{Performance on Pascal VOC dataset. Best viewed in color. }
-\label{fig:mapVSnumprop}
-\end{minipage}
-\hfill
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{minipage}{0.4\textwidth}
-\begin{tabular}{|c|c|c|c|c|}                    
-\hline                                          
- & Original & 20Q  & Oracle \\          
-\hline                                          
- Mean IU & 64.12 &  73.9 &  \textbf{78.2} \\        
-\hline                                          
-\end{tabular}     
-\captionof{table}{Mean intersect VS union (IU) of the predicted search area and the groundtruth objects. }                        
-\label{tab:space}                      
-\end{minipage}
-\end{figure}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \begin{table}\footnotesize                               
-% \begin{minipage}[c]{.55\textwidth}
-% \centering
-%  \begin{tabular}{|c|c|c|c|c|}                    
-% \hline                                          
-%  & Original & 20Q  & Oracle \\          
-% \hline                                          
-%  Mean IU & 64.12 &  73.9 &  \textbf{78.2} \\        
-% \hline                                          
-% \end{tabular}     
-% \end{minipage}%
-% \begin{minipage}[c]{.45\textwidth}
-%  \caption{Mean intersect VS union (IU) of the predicted search area and the groundtruth objects. }                        
-% \label{tab:space}    
-% \end{minipage}
-% \end{table}  
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{table*}[!htb]   \tiny
+\subsection{Improvement on the search space accuracy} To show the quality of our predicted search area, we evaluate the mean intersect vs. union (IU) of the search area produced by our 20 questions approach with the groundtruth object. We also compare with the search area of the original detector, produced by the union of the object proposals with high scores. Table~\ref{tab:space} shows that our approach has significantly improved the accuracy of overlapping between the predicted search area and the target query object.  We also find that the mean IU of the 20 questions search space has come close to that predicted by the oracle trajectory, which shows that our imitation learning has learn a good policy that closely mimic oracle's behavior.
+
+\subsection{Simultaneous detection and segmentation}
+Given we are using segment based object proposals generated by~\cite{arbelaez2014multiscale}, our detection system can also perform segmentation for the objects. We compare our algorithm with~\cite{BharathECCV2014} in  the simultaneous detection and segmentation task using the $AP^r$ metric proposed in the SDS paper. Table~\ref{tab:pascalseg} and Table~\ref{tab:msrc} show the performance on Pascal VOC10 dataset and the MSRC dataset respectively. We have outperformed the SDS approach on both datasets, showing our 20 questions algorithm can generalize well from the detection to segmentation task, as well as generalize to other data such as MSRC.
+
+
+
+
+
+\begin{table*}\tiny
 \caption{AP$^r$ performance on PASCAL VOC10 dataset.}
 \begin{tabular}{p{1.60cm}|p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}p{0.144cm}c}
 &{\begin{sideways}Aeroplane\end{sideways}}&{\begin{sideways}Bicycle\end{sideways}}&
@@ -113,14 +94,14 @@ SDS~\cite{BharathECCV2014} &{\bf68.2} & 52.1 & 51.6 & 30.7 & {\bf34.2} & 66.7 & 
 \hline                                                                                                                                                                          
 SDS+20Q          & 66.7 & {\bf55.0} & {\bf52.2} & {\bf33.3} & 32.1 & {\bf67.2} & {\bf53.7} & 66.9 & {\bf24.2} & {\bf53.8} & {\bf32.0} & 56.9 & 54.1 & 53.3 & 49.6 & {\bf25.1} & {\bf58.1} &{\bf 35.1} & {\bf61.3} & 55.5 & {\bf49.3} \\                   
 \hline     
-\end{tabular}\vspace{-2em}
+\end{tabular}
 \label{tab:pascalseg}
 \end{table*}
 
 
 
 
-\begin{table*}[!htb]   \scriptsize                               
+\begin{table}\scriptsize                               
 \begin{center}                                                                                                 
 \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}                                                                     
 \hline                                                                                                           
@@ -133,17 +114,8 @@ SDS+20Q & {\bf88.4} & {\bf93.8} & 45.8 & 48.3 & {\bf82.6} & {\bf76.7} & {\bf51.7
 \end{tabular}                                                                                                 
 \end{center}                              
 \caption{AP$^r$ performance on MSRC dataset. }                        
-\label{tab:msrc}  \vspace{-2em}                    
-\end{table*}   
-
-\subsection{Simultaneous detection and segmentation}
-Given that we employ segment based object proposals generated by~\cite{arbelaez2014multiscale}, our detection system can also perform segmentation. We compare our algorithm with~\cite{BharathECCV2014} in  the simultaneous detection and segmentation task using the $AP^r$ metric proposed in~\cite{BharathECCV2014}. Table~\ref{tab:pascalseg} and Table~\ref{tab:msrc} show the performance on Pascal VOC10 and the MSRC datasets respectively. We outperforms the SDS approach on both datasets, showing our 20 questions algorithm can generalize well from the detection to the segmentation task, as well as generalize to other datasets such as MSRC.
-
-
-
-
-
-                                                                                                 
+\label{tab:msrc}                      
+\end{table}                                                                                                    
 
 
 % ferrarri 2012

@@ -1,22 +1,21 @@
 \section{Problem Formulation}
-Given an image $X$ and a query object of class $c_q$ ($q \in {1,..,C}$), we detect
-the query object by sequentially choosing one
-context class to detect, and narrow down the search area for the query object based on
-observed detector responses. 
+Given an image $X$ and a query class $c_q$ ($q \in {1,..,C}$), we detect instances of
+the query class by sequentially choosing one
+context class to detect, and reduce the search area for the query class based on
+the observed context class detector responses. 
 The sequential decision-making problem can be formulated as a Markov Decision
 Process (MDP).
 \begin{mydef}
 The \textbf{Object Detection MDP} is defined by the tuple $(\mathcal{S}, \mathcal{A}, T(.), R(.), \gamma)$:
-\begin{itemize}
+\begin{itemize}[itemsep=-2pt]
 \item The \textbf{state} $s_t=(X^t, O^t)$, where $X^t$ is the search area for the
 query at time $t$ (initially $X^0$ is the entire image $X$), $O^t= \{o_1, o_2,
 \dots, o_t\}$ is a sequence of observed responses from applied contextual
 classifiers;
 \item The \textbf{action} set $\mathcal{A} = \{a_1, \dots, a_C, Stop,
-Reject\}$, where $a_i$ corresponds to running the detector of class
-$c_i$, \textit{Reject} means to reject the query class as occurring in the
-image and terminate the process, and \textit{Stop} outputs the search area
-and run the detector of the query class;
+Reject\}$, where $a_i$ mean run the detector of class
+$c_i$, \textit{Reject} means to decide that query class does not occur in the
+image and terminate the process, and \textit{Stop} runs the detector of the query class on the current search area;
 \item The \textbf{state transition} function $T(s'|s,a)$ defines a
 next-state distribution after action $a$ is taken in state $s$, which is deterministic in our case;
 \item The \textbf{reward} function $R(s,a) \rightarrow \mathbb{R}$ evaluates
@@ -44,7 +43,7 @@ Our goal is to learn the optimal policy for the object detection MDP.
 \section{Approach}
 We show our framework in Figure~\ref{fig:flowchart}.
 Given a query, we first generate region hypotheses using object proposal algorithms, 
-then the policy sequentially selects an action that rejects the occurrence of the query, poses a question about a context class, or stop and run the query detector. 
+then the policy sequentially either a) selects an action that rejects the occurrence of the query, b) poses a question about a context class, or c) stops and runs the query detector. 
 After an action is taken, the search locations are updated based on the responses and
 new posterior probabilities of each category are computed to update the state.
 In this section, we first present the imitation learning algorithm for learning a policy that plays the twenty questions game; 
@@ -53,7 +52,7 @@ we then describe how to refine the search area of the query given responses of c
 \subsection{Learning the Policy by Imitation}
 Typically, MDPs are solved by reinforcement learning (e.g., Q-learning~\cite{watkins1992q},
 REINFORCE~\cite{williams1992simple}). However, given our exponential search space, such trial-and-error
-approaches can take long to converge.
+approaches can take too long to converge.
 We therefore take the imitation learning approach, where we assume direct supervising
 signals from the oracle are available and learn to mimic the oracle's
 behavior.
@@ -83,9 +82,9 @@ We then collect examples $\{(s_t,a_t,r_t)\}$ from the oracle's trajectory for
 policy training.
 However, collecting examples from the oracle's trajectory
 only may result in mismatch in distributions of training and test data, since
-the learned policy may go to state the oracle never visited.
+the learned policy may go to states the oracle never visited.
 To solve the mismatch problem, we encourage exploration by search multiple
-times with random starting state.  Due to the large number of negative states for rejection, we sample the negative states by early pruning at negative immediate reward which imitates the early rejection action. After example collection, we train the policy (predict the optimal Q-values) by
+times with random starting states.  Due to the large number of negative states for rejection, we sample the negative states by early pruning at negative immediate reward which imitates the early rejection action. After example collection, we train the policy (predict the optimal Q-values) by
 ridge regression.
 
 \begin{figure*}[htb]
@@ -94,26 +93,27 @@ ridge regression.
 \caption{Flowchart of our context driven object searching. %We first generate region hypotheses using object proposal algorithms, then the policy evaluates the current state and iteratively selects the action maximizing the Q-value function. Afterwards, the possible search locations are updated and the posterior probabilities of each category are evaluated for the next state.
 }
 \label{fig:flowchart}
-\end{center}
+\end{center}\vspace{-1.6em}
 \end{figure*}
 
 \subsection{Context Modeling}
 \label{sec:context}
 Since our task is not only to detect instances of the query object but also to refine the search space of the query in the image as accurately as possible, conventional modeling of context as simple co-occurrence statistics is inadequate. Instead we present a data-driven location-aware approach to represent the spatial correlation between the objects and the scene. 
 
-We capture the spatial relationships in a non-parametric manner. During training, we 
+We capture the spatial relationships in a non-parametric manner. During training, the bounding box of a region $s^i$ is represented by $b^i = (x^i, y^i, \sigma^i)$ with $x, y$ as its location and $\sigma$ as the scale. For each pair of co-occurring regions belong to class $c_k$ and $c_l$ respectively, we index this pair as $j$ and store corresponding displacement vector $T_j= T(b^j_k, b^j_l)$ which includes translation $(\Delta x,\Delta y)$ and change of ratio in $x, y$ directions between the two boxes. 
 
-Given an action $a_t$ to detect context class $c_t$ at time $t$, we define $X_c \subset X$ as the \textit{exploration area for context} which excludes the observed regions of other contextual classes from the image. Here we formulate the context $p(c|c_t,X)$ as a posterior of the probabilistic vote map $p(c_t|c,X_c)$ defined on each pixel $(x_i,x_j)\in X$ over the image, and the responses of class $c_t$ after action $a_t$:
+During test time,  we define $X_c \subset X$ as the \textit{exploration area} for context which excludes the observed regions of other contextual classes in the image. Let $s^i \subset X_c$ be the context region $i$ in the test image. Given an action $a_k$ to detect context class $c_k$ at time $t$, to model the context between class $c_k$ and another class $c_l$, here we model the context $p(c_k|c_l,X)$ as the posterior of the probabilistic vote map $p(c_l|c_k,X_c)$ defined for each pixel in the image, and the responses of class $c_i$ after action $a_i$:
 \begin{eqnarray}
-p(c_t|c,X) = \sum_{X_c \subset X} p(c|c_t,X_c)p(c_t|X_c)
+p(c_k|c_l,X) = \sum_{s^i \subset X_c} p(c_l|c_k,s^i)p(c_k|s^i)
 \end{eqnarray}
+where $p(c_k|s^i)$ is the probabilities of $s^i$ as class $c_k$ after taking the action $a_k$ to run classification at time $t$.
 
-Given a refined search space $X_c\in X$ of a context class $c_t$ at time $t$, we formalize $p(c|c_t,X)$ as a weighted vote from the cooccurring region pairs of class $c_t$ and $c$ in training scenes. Let $(s_{c_t}^i, s_c^i)$ be the $i$-th pair of co-occurring regions of class $c_t$ and $c$, and $b_{c_t}^i$ and $b_c^i$ be their corresponding bounding boxes. We can now define the probabilistic vote map $p(c|c_t,X)$ as:
+ We can now define the probabilistic vote map $p(c_l|c_k,X)$ as follows.  Let $(s_k^j, s_l^j)$ be the $j$-th training pair of co-occurring regions of class $c_k$ and $c_l$, and $b_{k}^j$ and $b_l^j$ be their corresponding bounding boxes. Let $s_k^i \subset X_c$ be the context region $i$ detected as class $c_k$ in the test image. We retrieve those training pairs $(s_k^j, s_l^j)$ between class $c_k$ and $c_l$ and compute the RBF kernel $W(.)$ measuring the similarity of the features of train/test segments of class $c_k$ as $W(s_k^i,s_k^j;\theta^W)$, where $\theta^W$ is the kernel parameter. We then formalize $p(c_l|c_k,X_c)$ as a weighted vote from the co-occurring region pairs of classes $c_k$ and $c_l$ in training scenes.
 \begin{eqnarray}
 \label{eq:votemap}
-p(c|c_t,X_c) = \frac{1}{Z_c}\sum_i W(s_{c_t}^i,s;\theta^W).T(b_{c_t}^i,b_c^i)
+p(c_l|c_k,s^i) = \frac{1}{Z_c}\sum_{i} \sum_{j} W(s_k^i,s_k^j;\theta^W).T(b_k^j,b_l^j)
 \end{eqnarray}
-where $s\in X^t$ is a region within the search space of the context class $c_t$. $Z_c$ is the normalization function. $W(.)$ is a kernel measuring similarity of region $s$ with a training region $s_i$. $T(b_{c_t}^i,b_c^i)$ models the transformation from $b_{c_t}^i$ to $b_c^i$, including translation and scaling. Figure~\ref{fig:votemap} shows a few examples of the vote maps. We can see that with the exemplar based and semantically aware voting, the resulting vote maps give more accurate search areas for the query objects.
+where $Z_c$ is the normalization function. Figure~\ref{fig:votemap} shows a few examples of the vote maps. We can see that with the exemplar based and semantically aware voting, the resulting vote maps give more accurate search areas for the query objects.
 
 \captionsetup[subfigure]{labelformat=empty}
 \begin{figure}[ht!]
@@ -121,25 +121,28 @@ where $s\in X^t$ is a region within the search space of the context class $c_t$.
 \begin{subfigure}[t]{0.48\textwidth}
 \centering
 \includegraphics[height=1.2in]{figures/vote_sky_boat.pdf}
-\caption{(i) Weighted vote map from sky to boat.}
+\caption{3a. Weighted vote map from sky to boat.}
 \label{fig:vote_sky_boat}
 \end{subfigure}
 \begin{subfigure}[t]{0.48\textwidth}
 \centering
 \includegraphics[height=1.2in]{figures/votemap.pdf}
-\caption{(ii) Example context vote maps.}
+\caption{3b. Example context vote maps.}
 \label{fig:votemap}
 \end{subfigure}
-\caption{(i):The first row shows example training pairs of the sky and the boat. 
+\caption{a. The first row shows example training pairs of the sky and the boat. 
 The second row shows the test image and the weighted voting map. 
-The width of the arrow denotes the weighted
-similarity $W(s_{c_t}^i,s;\theta^W)$ between the test segment
-(highlighted in yellow) and one of the training sky segments (highlighted
-in light blue).
-(ii) Each pair shows the original image and the voted probability
+The arrow denotes applying the weighted displacement vectors $T(b_k^j,b_l^j)$ to the pairs of test and train segment of sky
+(highlighted in yellow and blue respectively). 
+b. Each pair shows the original image and the voted probability
 map of object locations given observed context. From (a) -- (d) are the vote maps from water to boat, sky to boat, road to car and grass to cow. Best viewed in color.
 }
 \end{figure}
+
+The final context probabilistic vote map is given by
+\begin{eqnarray}
+p(c_k|c_l,X) =  \sum_{s^i \subset X_c} p(c_k|s^i) \sum_{i} \sum_{j} W(s_k^i,s_k^j;\theta^W).T(b_k^j,b_l^j)\nonumber\\
+\end{eqnarray}
 
 % \begin{figure}[ht!]
 % \begin{center}
@@ -160,15 +163,11 @@ map of object locations given observed context. From (a) -- (d) are the vote map
 
 
 
-The final context probabilistic vote map is given by
-\begin{eqnarray}
-p(c_t|c,X) = \sum_{s\in X_c} p(c_t|X_c)\sum_i W(s_{c_t}^i,s;\theta^W).T(b_{c_t}^i,b_c^i)\nonumber\\
-\end{eqnarray}
-where $p(c_t|X_c)$ is the probabilities of $s$ as class $c_t$ after taking the action $a_t$ to run classification at time $t$.
+
 
 
 \subsection{Update Responses and Search Area}
-After taking action $a_t$ and receiving response $o_t = p(c_t|c, X)$ from context class $c_t$, we integrate the response into observations from previous sequence of actions. Assuming the detectors and context classifiers are trained independently per category, the aggregated responses can be modeled as:
+After taking action $a_t$ and receiving response $o_t = p(c_t|c, X)$ from context class $c_t$, we integrate the response into observations from the previous sequence of actions. Assuming the detectors and context classifiers are trained independently per category, the aggregated responses can be modeled as:
 \begin{eqnarray}
 p(O^t|c, X) = \prod_t p(c_t|c,X)
 \end{eqnarray}
