@@ -1,5 +1,11 @@
 \begin{thebibliography}{10}\itemsep=-1pt
 
+\bibitem{alexe2010object}
+B.~Alexe, T.~Deselaers, and V.~Ferrari.
+\newblock What is an object?
+\newblock In {\em Computer Vision and Pattern Recognition (CVPR), 2010 IEEE
+  Conference on}, pages 73--80. IEEE, 2010.
+
 \bibitem{bogdan2012context}
 B.~Alexe, N.~Heess, Y.~W. Teh, and V.~Ferrari.
 \newblock Searching for objects driven by context.
@@ -9,11 +15,6 @@ B.~Alexe, N.~Heess, Y.~W. Teh, and V.~Ferrari.
 P.~Arbel{\'a}ez, J.~Pont-Tuset, J.~T. Barron, F.~Marques, and J.~Malik.
 \newblock Multiscale combinatorial grouping.
 \newblock CVPR, 2014.
-
-\bibitem{barto1998reinforcement}
-A.~G. Barto.
-\newblock {\em Reinforcement learning: An introduction}.
-\newblock MIT press, 1998.
 
 \bibitem{biederman1982scene}
 I.~Biederman, R.~J. Mezzanotte, and J.~C. Rabinowitz.
@@ -45,6 +46,12 @@ X.~Chen, A.~Jain, A.~Gupta, and L.~S. Davis.
 \newblock In {\em Computer Vision and Pattern Recognition (CVPR), 2011 IEEE
   Conference on}, pages 2001--2008. IEEE, 2011.
 
+\bibitem{Everingham10}
+M.~Everingham, L.~Van~Gool, C.~K.~I. Williams, J.~Winn, and A.~Zisserman.
+\newblock The pascal visual object classes (voc) challenge.
+\newblock {\em International Journal of Computer Vision}, 88(2):303--338, June
+  2010.
+
 \bibitem{felzenszwalb2010object}
 P.~F. Felzenszwalb, R.~B. Girshick, D.~McAllester, and D.~Ramanan.
 \newblock Object detection with discriminatively trained part-based models.
@@ -60,6 +67,12 @@ C.~Galleguillos and S.~Belongie.
 T.~Gao and D.~Koller.
 \newblock Active classification based on value of classifier.
 \newblock {\em NIPS}, 2011.
+
+\bibitem{geman2015visual}
+D.~Geman, S.~Geman, N.~Hallonquist, and L.~Younes.
+\newblock Visual turing test for computer vision systems.
+\newblock {\em Proceedings of the National Academy of Sciences},
+  112(12):3618--3623, 2015.
 
 \bibitem{girshick14CVPR}
 R.~Girshick, J.~Donahue, T.~Darrell, and J.~Malik.
@@ -95,24 +108,19 @@ L.~Ladicky, C.~Russell, P.~Kohli, and P.~H. Torr.
 \newblock Graph cut based inference with co-occurrence statistics.
 \newblock In {\em Computer Vision--ECCV 2010}, pages 239--253. Springer, 2010.
 
-\bibitem{lampert2009efficient}
-C.~H. Lampert, M.~B. Blaschko, and T.~Hofmann.
-\newblock Efficient subwindow search: A branch and bound framework for object
-  localization.
-\newblock {\em Pattern Analysis and Machine Intelligence, IEEE Transactions
-  on}, 31(12):2129--2142, 2009.
-
 \bibitem{moores2003associative}
 E.~Moores, L.~Laiti, and L.~Chelazzi.
 \newblock Associative knowledge controls deployment of visual selective
   attention.
 \newblock {\em Nature neuroscience}, 6(2):182--189, 2003.
 
-\bibitem{mottaghirole}
+\bibitem{mottaghi2014role}
 R.~Mottaghi, X.~Chen, X.~Liu, N.-G. Cho, S.-W. Lee, S.~Fidler, R.~Urtasun, and
   A.~Yuille.
 \newblock The role of context for object detection and semantic segmentation in
   the wild.
+\newblock In {\em Computer Vision and Pattern Recognition (CVPR), 2014 IEEE
+  Conference on}, pages 891--898. IEEE, 2014.
 
 \bibitem{najemnik2005optimal}
 J.~Najemnik and W.~S. Geisler.
@@ -126,16 +134,43 @@ D.~Parikh, C.~L. Zitnick, and T.~Chen.
 \newblock {\em Pattern Analysis and Machine Intelligence, IEEE Transactions
   on}, 34(10):1978--1991, 2012.
 
+\bibitem{ranzato2014learning}
+M.~Ranzato.
+\newblock On learning where to look.
+\newblock {\em arXiv preprint arXiv:1405.5488}, 2014.
+
+\bibitem{rupprecht2015image}
+C.~Rupprecht, L.~Peter, and N.~Navab.
+\newblock Image segmentation in twenty questions.
+\newblock In {\em Proceedings of the IEEE Conference on Computer Vision and
+  Pattern Recognition}, pages 3314--3322, 2015.
+
 \bibitem{shotton2006textonboost}
 J.~Shotton, J.~Winn, C.~Rother, and A.~Criminisi.
 \newblock Textonboost: Joint appearance, shape and context modeling for
   multi-class object recognition and segmentation.
 \newblock In {\em Computer Vision--ECCV 2006}, pages 1--15. Springer, 2006.
 
+\bibitem{tighe2010superparsing}
+J.~Tighe and S.~Lazebnik.
+\newblock Superparsing: scalable nonparametric image parsing with superpixels.
+\newblock In {\em Computer Vision--ECCV 2010}, pages 352--365. Springer, 2010.
+
 \bibitem{van2011segmentation}
 K.~E. Van~de Sande, J.~R. Uijlings, T.~Gevers, and A.~W. Smeulders.
 \newblock Segmentation as selective search for object recognition.
 \newblock In {\em Computer Vision (ICCV), 2011 IEEE International Conference
   on}, pages 1879--1886. IEEE, 2011.
+
+\bibitem{watkins1992q}
+C.~J. Watkins and P.~Dayan.
+\newblock Q-learning.
+\newblock {\em Machine learning}, 8(3-4):279--292, 1992.
+
+\bibitem{williams1992simple}
+R.~J. Williams.
+\newblock Simple statistical gradient-following algorithms for connectionist
+  reinforcement learning.
+\newblock {\em Machine learning}, 8(3-4):229--256, 1992.
 
 \end{thebibliography}

@@ -8,17 +8,18 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{multirow}
-
+\usepackage{rotating}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{amsthm}
 %\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
+\theoremstyle{definition}
 \newtheorem{mydef}{Definition}
 \newcommand{\CXNote}[1]{\textbf{[Stephen: {#1}]}}
 \newcommand{\HHNote}[1]{\textbf{[hhe: {#1}]}}
 
 
-\title{Searching for Objects in 20 Questions}
+\title{The Imitation Game:\\ Object Detection in 20 Questions}
 
 
 \author{
@@ -38,7 +39,6 @@ Gregory Shakhnarovich\\
 Toyota Technological Institute at Chicago \\
 Chicago, IL\\
 \texttt{gregory@ttic.edu} \\
-
 \And
 Larry S. Davis \\
 Department of Computer Science\\
@@ -65,16 +65,19 @@ College Park, MD 20742 \\
 \maketitle
 
 \begin{abstract}
-We propose a new strategy for simultaneous object detection and segmentation. Instead of evaluating classifiers for all possible locations of objects in the
-image, we develop a divide-and-conquer approach by sequentially posing questions about the query and related context, like playing a ``Twenty Questions'' game, to decide where to search for the object. We formulate the problem as a Markov Decision Process (MDP) and learn a policy using reinforcement learning that can dynamically select questions based on the query, the scene and current observed responses given by object detectors and classifiers. The algorithm reduces about 30\% of the object proposals evaluation while maintaining high average precision. Experiments show promising results compared with baselines of exhaustive search, searching for objects in random sequences and random locations.
+We propose a new strategy for simultaneous object detection and segmentation. Instead of evaluating all object detectors at all possible locations in the
+image, we develop a divide-and-conquer approach by sequentially posing questions about the query and its related context---like playing a ``Twenty Questions'' game---to decide where to search for the object. We formulate the problem as a Markov Decision Process and learn a search policy by imitation learning. At each step, the policy dynamically selects a question based on the query, the scene and observed responses given by object detectors evaluated so far.
+Experimental results show that our
+algorithm reduces over 30\% of the object proposal evaluation with little loss in average precision compared to exhaustive search. 
+Our learned policy also achieves better speed-accuracy tradeoff than the random search strategy.
 \end{abstract}
 
 %%%%%%%%% BODY TEXT
 \input{intro}
 \input{relatedwork}
-% \input{overview}
 \input{approach}
-% \input{experiment}
+\input{experiment}
+
 % \input{conclusion}
 
 

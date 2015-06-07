@@ -1,0 +1,149 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{felzenszwalb2010object}
+\citation{carreira2012cpmc}
+\citation{van2011segmentation}
+\citation{arbelaez2014multiscale}
+\citation{biederman1982scene}
+\citation{hock1974contextual}
+\citation{parikh2012exploring}
+\citation{gould2009decomposing}
+\citation{ladicky2010graph}
+\citation{najemnik2005optimal}
+\citation{moores2003associative}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}}
+\citation{blanchard2005hierarchical}
+\citation{rupprecht2015image}
+\citation{geman2015visual}
+\citation{ranzato2014learning}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Illustration of our sequential search for query objects in 20 context-driven questions.\relax }}{2}{figure.caption.1}}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:20Qintro}{{1}{2}{Illustration of our sequential search for query objects in 20 context-driven questions.\relax }{figure.caption.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}}
+\newlabel{sec:relatedwork}{{2}{2}{Related Work}{section.2}{}}
+\citation{gao2011active}
+\citation{branson2010visual}
+\citation{sergey2012timely}
+\citation{felzenszwalb2010object}
+\citation{carreira2012cpmc}
+\citation{van2011segmentation}
+\citation{arbelaez2014multiscale}
+\citation{girshick14CVPR}
+\citation{BharathECCV2014}
+\citation{shotton2006textonboost}
+\citation{ladicky2010graph}
+\citation{galleguillos2010context}
+\citation{chen2011piecing}
+\citation{mottaghi2014role}
+\citation{bogdan2012context}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Problem Formulation}{3}{section.3}}
+\citation{watkins1992q}
+\citation{williams1992simple}
+\newlabel{eq:imreward}{{1}{4}{Problem Formulation}{equation.3.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Approach}{4}{section.4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Learning the Policy by Imitation}{4}{subsection.4.1}}
+\newlabel{eq:pi}{{2}{4}{Learning the Policy by Imitation}{equation.4.2}{}}
+\newlabel{eq:qvalue}{{3}{4}{Learning the Policy by Imitation}{equation.4.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Context Modeling}{4}{subsection.4.2}}
+\newlabel{sec:context}{{4.2}{4}{Context Modeling}{subsection.4.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces {\bf  Flowchart of our context driven object searching algorithm}.We first generate region hypotheses using object proposal algorithms, then the policy evaluates the current state and iteratively selects the action maximizing the Q-value function. Afterwards, the possible search locations are updated and the posterior probabilities of each category are evaluated for the next state. \relax }}{5}{figure.caption.2}}
+\newlabel{fig:flowchart}{{2}{5}{{\bf Flowchart of our context driven object searching algorithm}.We first generate region hypotheses using object proposal algorithms, then the policy evaluates the current state and iteratively selects the action maximizing the Q-value function. Afterwards, the possible search locations are updated and the posterior probabilities of each category are evaluated for the next state. \relax }{figure.caption.2}{}}
+\newlabel{eq:votemap}{{5}{5}{Context Modeling}{equation.4.5}{}}
+\citation{arbelaez2014multiscale}
+\citation{chen2011piecing}
+\citation{Everingham10}
+\citation{mottaghi2014role}
+\citation{mottaghi2014role}
+\citation{shotton2006textonboost}
+\citation{BharathECCV2014}
+\citation{tighe2010superparsing}
+\newlabel{fig:vote_sky_boat}{{3a}{6}{3a. Weighted vote map from sky to boat.\relax }{figure.caption.3}{}}
+\newlabel{sub@fig:vote_sky_boat}{{a}{6}{3a. Weighted vote map from sky to boat.\relax }{figure.caption.3}{}}
+\newlabel{fig:votemap}{{3b}{6}{3b. Examples of context vote maps.\relax }{figure.caption.3}{}}
+\newlabel{sub@fig:votemap}{{b}{6}{3b. Examples of context vote maps.\relax }{figure.caption.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces {\bf  a. Our context voting model}. The first row shows example training pairs of the sky and the boat. The second row shows the test image and the weighted voting map. The arrows denote applying the weighted displacement vectors $T(b_k^j,b_l^j)$ from the train pairs to the test pairs of sky and boat (highlighted in yellow and blue respectively). {\bf  b. Examples of context vote maps}. Each pair shows the original image and the voted probability map of object locations given observed context. From (a) -- (d) are the vote maps from water to boat, sky to boat, road to car and grass to cow. Best viewed in color. \relax }}{6}{figure.caption.3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Update Responses and Search Area}{6}{subsection.4.3}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Implementation Details}{6}{section.5}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Object Proposals}{6}{subsection.5.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Datasets}{6}{subsection.5.2}}
+\citation{BharathECCV2014}
+\citation{girshick14CVPR}
+\citation{mottaghi2014role}
+\citation{BharathECCV2014}
+\citation{bogdan2012context}
+\citation{van2011segmentation}
+\citation{alexe2010object}
+\citation{mottaghi2014role}
+\citation{mottaghi2014role}
+\citation{girshick14CVPR}
+\citation{BharathECCV2014}
+\citation{BharathECCV2014}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Avg. detection precision of ours and other algorithms on PASCAL VOC10 dataset.\relax }}{7}{table.caption.4}}
+\newlabel{Tablepascal}{{1}{7}{Avg. detection precision of ours and other algorithms on PASCAL VOC10 dataset.\relax }{table.caption.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Feature Representation}{7}{subsection.5.3}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Experiments}{7}{section.6}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Performance of Object Detection}{7}{subsection.6.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Reduction of Object Proposals}{7}{subsection.6.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Improvement on the search space accuracy}{7}{subsection.6.3}}
+\citation{BharathECCV2014}
+\citation{arbelaez2014multiscale}
+\citation{BharathECCV2014}
+\citation{BharathECCV2014}
+\bibstyle{ieee}
+\bibdata{nips2015}
+\bibcite{alexe2010object}{1}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Performance on Pascal VOC dataset. Best viewed in color. \relax }}{8}{figure.caption.5}}
+\newlabel{fig:mapVSnumprop}{{4}{8}{Performance on Pascal VOC dataset. Best viewed in color. \relax }{figure.caption.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Mean intersect VS union (IU) of the predicted search area and the groundtruth objects. \relax }}{8}{figure.caption.5}}
+\newlabel{tab:space}{{2}{8}{Mean intersect VS union (IU) of the predicted search area and the groundtruth objects. \relax }{figure.caption.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces AP$^r$ performance on PASCAL VOC10 dataset.\relax }}{8}{table.caption.6}}
+\newlabel{tab:pascalseg}{{3}{8}{AP$^r$ performance on PASCAL VOC10 dataset.\relax }{table.caption.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces AP$^r$ performance on MSRC dataset. \relax }}{8}{table.caption.7}}
+\newlabel{tab:msrc}{{4}{8}{AP$^r$ performance on MSRC dataset. \relax }{table.caption.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Simultaneous detection and segmentation}{8}{subsection.6.4}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{8}{section.7}}
+\bibcite{bogdan2012context}{2}
+\bibcite{arbelaez2014multiscale}{3}
+\bibcite{biederman1982scene}{4}
+\bibcite{blanchard2005hierarchical}{5}
+\bibcite{branson2010visual}{6}
+\bibcite{carreira2012cpmc}{7}
+\bibcite{chen2011piecing}{8}
+\bibcite{Everingham10}{9}
+\bibcite{felzenszwalb2010object}{10}
+\bibcite{galleguillos2010context}{11}
+\bibcite{gao2011active}{12}
+\bibcite{geman2015visual}{13}
+\bibcite{girshick14CVPR}{14}
+\bibcite{gould2009decomposing}{15}
+\bibcite{BharathECCV2014}{16}
+\bibcite{hock1974contextual}{17}
+\bibcite{sergey2012timely}{18}
+\bibcite{ladicky2010graph}{19}
+\bibcite{moores2003associative}{20}
+\bibcite{mottaghi2014role}{21}
+\bibcite{najemnik2005optimal}{22}
+\bibcite{parikh2012exploring}{23}
+\bibcite{ranzato2014learning}{24}
+\bibcite{rupprecht2015image}{25}
+\bibcite{shotton2006textonboost}{26}
+\bibcite{tighe2010superparsing}{27}
+\bibcite{van2011segmentation}{28}
+\bibcite{watkins1992q}{29}
+\bibcite{williams1992simple}{30}

@@ -4,47 +4,45 @@ The top-level auxiliary file: nips2015.aux
 The style file: ieee.bst
 Database file #1: nips2015.bib
 Warning--empty booktitle in arbelaez2014multiscale
-Warning--empty journal in mottaghirole
-Warning--empty year in mottaghirole
-You've used 24 entries,
+You've used 30 entries,
             2120 wiz_defined-function locations,
-            633 strings with 8064 characters,
-and the built_in function-call counts, 9408 in all, are:
-= -- 928
-> -- 496
-< -- 7
-+ -- 195
-- -- 170
-* -- 681
-:= -- 1534
-add.period$ -- 77
-call.type$ -- 24
-change.case$ -- 156
+            670 strings with 9128 characters,
+and the built_in function-call counts, 12162 in all, are:
+= -- 1226
+> -- 598
+< -- 11
++ -- 236
+- -- 204
+* -- 868
+:= -- 1942
+add.period$ -- 99
+call.type$ -- 30
+change.case$ -- 192
 chr.to.int$ -- 0
-cite$ -- 27
-duplicate$ -- 351
-empty$ -- 696
-format.name$ -- 170
-if$ -- 1977
+cite$ -- 31
+duplicate$ -- 465
+empty$ -- 919
+format.name$ -- 204
+if$ -- 2593
 int.to.chr$ -- 0
-int.to.str$ -- 24
-missing$ -- 25
-newline$ -- 122
-num.names$ -- 48
-pop$ -- 178
+int.to.str$ -- 30
+missing$ -- 30
+newline$ -- 153
+num.names$ -- 60
+pop$ -- 211
 preamble$ -- 1
-purify$ -- 133
+purify$ -- 162
 quote$ -- 0
-skip$ -- 244
+skip$ -- 336
 stack$ -- 0
-substring$ -- 577
-swap$ -- 89
-text.length$ -- 7
+substring$ -- 811
+swap$ -- 135
+text.length$ -- 11
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 94
-warning$ -- 3
-while$ -- 87
-width$ -- 26
-write$ -- 261
-(There were 3 warnings)
+type$ -- 120
+warning$ -- 1
+while$ -- 117
+width$ -- 32
+write$ -- 334
+(There was 1 warning)

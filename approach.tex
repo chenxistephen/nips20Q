@@ -90,25 +90,25 @@ ridge regression.
 \begin{figure*}[htb]
 \begin{center}
 \includegraphics[width=0.8\linewidth]{figures/flowchart_Q.pdf}
-\caption{Flowchart of our context driven object searching. %We first generate region hypotheses using object proposal algorithms, then the policy evaluates the current state and iteratively selects the action maximizing the Q-value function. Afterwards, the possible search locations are updated and the posterior probabilities of each category are evaluated for the next state.
+\caption{{\bf Flowchart of our context driven object searching algorithm}.We first generate region hypotheses using object proposal algorithms, then the policy evaluates the current state and iteratively selects the action maximizing the Q-value function. Afterwards, the possible search locations are updated and the posterior probabilities of each category are evaluated for the next state.
 }
 \label{fig:flowchart}
-\end{center}\vspace{-1.6em}
+\end{center}\vspace{-1.8em}
 \end{figure*}
 
 \subsection{Context Modeling}
 \label{sec:context}
 Since our task is not only to detect instances of the query object but also to refine the search space of the query in the image as accurately as possible, conventional modeling of context as simple co-occurrence statistics is inadequate. Instead we present a data-driven location-aware approach to represent the spatial correlation between the objects and the scene. 
 
-We capture the spatial relationships in a non-parametric manner. During training, the bounding box of a region $s^i$ is represented by $b^i = (x^i, y^i, \sigma^i)$ with $x, y$ as its location and $\sigma$ as the scale. For each pair of co-occurring regions belong to class $c_k$ and $c_l$ respectively, we index this pair as $j$ and store corresponding displacement vector $T_j= T(b^j_k, b^j_l)$ which includes translation $(\Delta x,\Delta y)$ and change of ratio in $x, y$ directions between the two boxes. 
+We capture the spatial relationships in a non-parametric manner. Figure~\ref{fig:vote_sky_boat} illustrates our model. During training, the bounding box of a region $s^i$ is represented by $b^i = (x^i, y^i, \sigma^i)$ with $x, y$ as its location and $\sigma$ as the scale. For each pair of co-occurring regions belong to class $c_k$ and $c_l$ respectively, we index this pair as $j$ and store corresponding displacement vector $T_j= T(b^j_k, b^j_l)$ which includes translation $(\Delta x,\Delta y)$ and change of ratio in $x, y$ directions between the two boxes. 
 
 During test time,  we define $X_c \subset X$ as the \textit{exploration area} for context which excludes the observed regions of other contextual classes in the image. Let $s^i \subset X_c$ be the context region $i$ in the test image. Given an action $a_k$ to detect context class $c_k$ at time $t$, to model the context between class $c_k$ and another class $c_l$, here we model the context $p(c_k|c_l,X)$ as the posterior of the probabilistic vote map $p(c_l|c_k,X_c)$ defined for each pixel in the image, and the responses of class $c_i$ after action $a_i$:
 \begin{eqnarray}
-p(c_k|c_l,X) = \sum_{s^i \subset X_c} p(c_l|c_k,s^i)p(c_k|s^i)
+p(c_k|c_l,X)  = p(c_k|c_l,X_c) = \sum_{s^i \subset X_c} p(c_l|c_k,s^i)p(c_k|s^i)
 \end{eqnarray}
 where $p(c_k|s^i)$ is the probabilities of $s^i$ as class $c_k$ after taking the action $a_k$ to run classification at time $t$.
 
- We can now define the probabilistic vote map $p(c_l|c_k,X)$ as follows.  Let $(s_k^j, s_l^j)$ be the $j$-th training pair of co-occurring regions of class $c_k$ and $c_l$, and $b_{k}^j$ and $b_l^j$ be their corresponding bounding boxes. Let $s_k^i \subset X_c$ be the context region $i$ detected as class $c_k$ in the test image. We retrieve those training pairs $(s_k^j, s_l^j)$ between class $c_k$ and $c_l$ and compute the RBF kernel $W(.)$ measuring the similarity of the features of train/test segments of class $c_k$ as $W(s_k^i,s_k^j;\theta^W)$, where $\theta^W$ is the kernel parameter. We then formalize $p(c_l|c_k,X_c)$ as a weighted vote from the co-occurring region pairs of classes $c_k$ and $c_l$ in training scenes.
+ We can now define the probabilistic vote map $p(c_l|c_k,s^i)$ as follows.  Let $(s_k^j, s_l^j)$ be the $j$-th training pair of co-occurring regions of class $c_k$ and $c_l$, and $b_{k}^j$ and $b_l^j$ be their corresponding bounding boxes. Let $s_k^i \subset X_c$ be the context region $i$ detected as class $c_k$ in the test image. We retrieve those training pairs $(s_k^j, s_l^j)$ between class $c_k$ and $c_l$ and compute the RBF kernel $W(.)$ measuring the similarity of the features of train/test segments of class $c_k$ as $W(s_k^i,s_k^j;\theta^W)$, where $\theta^W$ is the kernel parameter. We then formalize $p(c_l|c_k,X_c)$ as a weighted vote from the co-occurring region pairs of classes $c_k$ and $c_l$ in training scenes.
 \begin{eqnarray}
 \label{eq:votemap}
 p(c_l|c_k,s^i) = \frac{1}{Z_c}\sum_{i} \sum_{j} W(s_k^i,s_k^j;\theta^W).T(b_k^j,b_l^j)
@@ -127,14 +127,14 @@ where $Z_c$ is the normalization function. Figure~\ref{fig:votemap} shows a few 
 \begin{subfigure}[t]{0.48\textwidth}
 \centering
 \includegraphics[height=1.2in]{figures/votemap.pdf}
-\caption{3b. Example context vote maps.}
+\caption{3b. Examples of context vote maps.}
 \label{fig:votemap}
 \end{subfigure}
-\caption{a. The first row shows example training pairs of the sky and the boat. 
+\caption{{\bf a.  Our context voting model}. The first row shows example training pairs of the sky and the boat. 
 The second row shows the test image and the weighted voting map. 
-The arrow denotes applying the weighted displacement vectors $T(b_k^j,b_l^j)$ to the pairs of test and train segment of sky
+The arrows denote applying the weighted displacement vectors $T(b_k^j,b_l^j)$ from the train pairs to the test pairs of sky and boat
 (highlighted in yellow and blue respectively). 
-b. Each pair shows the original image and the voted probability
+{\bf b. Examples of context vote maps}. Each pair shows the original image and the voted probability
 map of object locations given observed context. From (a) -- (d) are the vote maps from water to boat, sky to boat, road to car and grass to cow. Best viewed in color.
 }
 \end{figure}
